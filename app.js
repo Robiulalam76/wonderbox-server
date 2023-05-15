@@ -13,10 +13,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // require routes
 const userRoutes = require("./modules/user/userRoutes");
+// const userRoutes = require("./modules/admin/");
+const productRoutes = require("./modules/product/productRoutes");
+const storeRoutes = require("./modules/store/storeRoutes");
+const cardRoutes = require("./modules/card/cardRoutes");
 
 
 // api routes
 app.use("/api/user", userRoutes);
+app.use("/api/product", productRoutes);
+app.use("/api/store", storeRoutes);
+app.use("/api/card", cardRoutes);
 
 
 

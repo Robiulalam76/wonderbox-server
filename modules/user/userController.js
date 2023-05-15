@@ -58,7 +58,6 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
     console.log(req.body.email);
     try {
-
         const { email, password } = req.body;
         if (!email || !password) {
             return res.send({
@@ -68,7 +67,7 @@ const loginUser = async (req, res) => {
         }
         else {
             const findUser = await User.findOne({ email: email })
-            // console.log(findUser);
+            console.log(findUser);
             if (!findUser) {
                 return res.send({
                     status: "error",
@@ -83,7 +82,7 @@ const loginUser = async (req, res) => {
                     });
                 }
                 else {
-
+                    console.log("verify trou");
                     if (bcrypt.compareSync(password, findUser.password)) {
                         const token = signInToken(findUser);
                         res.send({
@@ -112,7 +111,7 @@ const loginUser = async (req, res) => {
     } catch (error) {
         res.status(400).json({
             status: "error",
-            message: "Data couldn't insert a",
+            message: "Data couldn't insert",
             error: error.message,
         });
     }
