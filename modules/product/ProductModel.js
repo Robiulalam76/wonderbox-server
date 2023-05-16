@@ -54,6 +54,11 @@ const productSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
+        type: {
+            type: String,
+            enum: ["wallet", "package"],
+            required: true
+        },
         active: {
             type: String,
             enum: ["true", "false"],

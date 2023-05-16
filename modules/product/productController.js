@@ -16,7 +16,9 @@ const createProduct = async (req, res) => {
             childrenSlug: req.body.children.replaceAll(" ", "-").toLowerCase(),
             titleSlug: req.body.title.replaceAll(" ", "-").toLowerCase(),
             description: req.body.description,
+            type: req.body.type,
         })
+        console.log(req.body);
         const result = await newProduct.save()
         res.status(400).json({
             status: "success",
@@ -36,7 +38,7 @@ const createProduct = async (req, res) => {
 
 const getShowingProducts = async (req, res) => {
     try {
-        const products = await Product.find({ status: "Show" }).sort({ _id: -1 });
+        const products = await Product.find({ status: "Show", active: "true" }).sort({ _id: -1 });
         res.send(products);
     } catch (err) {
         res.status(500).send({
@@ -132,6 +134,20 @@ const getProductById = async (req, res) => {
     console.log(req.params.id);
     try {
         const product = await Product.findById(req.params.id);
+        // console.log(product);
+        res.send(product);
+    } catch (err) {
+        res.status(500).send({
+            message: err.message,
+        });
+    }
+};
+
+// get products by store id
+const getProductsByStoreId = async (req, res) => {
+    console.log(req.params.id);
+    try {
+        const product = await Product.find({ storeId: req.params.id });
         // console.log(product);
         res.send(product);
     } catch (err) {
@@ -347,6 +363,7 @@ const getAllProductsByRole = async (req, res) => {
 
 module.exports = {
     createProduct,
+    getProductsByStoreId,
     getAllProducts,
     getShowingProducts,
     getDiscountedProducts,

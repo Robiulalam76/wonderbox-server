@@ -1,12 +1,15 @@
 const express = require("express");
 const { isAuth } = require("../../config/auth");
-const { createProduct, getProductById, getShowingProducts, getDiscountedProducts, getAllProducts, getLatestProducts, getStockOutProducts, getProductBySlug, getProductsByParent, getProductsBySlugAndChildrenSlug, getSearchProducts, updateProduct, updateStatus, deleteProduct, getAllProductsByRole } = require("./productController");
+const { createProduct, getProductById, getShowingProducts, getDiscountedProducts, getAllProducts, getLatestProducts, getStockOutProducts, getProductBySlug, getProductsByParent, getProductsBySlugAndChildrenSlug, getSearchProducts, updateProduct, updateStatus, deleteProduct, getAllProductsByRole, getProductsByStoreId } = require("./productController");
 const router = express.Router();
 
 // new product
 router.post("/add", createProduct)
 
 router.get("/:id", getProductById);
+
+// get prducts by store
+router.get("/store/:id", getProductsByStoreId);
 
 //get showing products only
 router.get("/show/all", getShowingProducts);
