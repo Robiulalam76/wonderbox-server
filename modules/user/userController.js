@@ -214,6 +214,7 @@ const updateUser = async (req, res) => {
 
 // get user info by token verified => email
 const getUserInfo = async (req, res) => {
+    console.log(req.user);
     try {
         const user = await User.findOne({ email: req?.user?.email })
         console.log(user);

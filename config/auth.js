@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const Admin = require("../modules/admin/AdminModel");
 
 const signInToken = (user) => {
-    console.log(user, "yy");
+    console.log(user, "yydf");
     return jwt.sign(
         {
             _id: user._id,
@@ -13,7 +13,7 @@ const signInToken = (user) => {
             phone: user.phone,
             image: user.image,
         },
-        "5r4se46e79y8hw786g4aew86rf746rtf4a6egh7498h468earf494ga6469gh4w4r5gy6e5g6e45g+9ea5gh+a6e5f+95FR+9q45f+9",
+        "5r4se46e79y8hw786g4aew86rf746rtf4a6egh7498h468earf494ga6469gh4w4r5gy6e5g6e45g+9ea5gh+a6e5f+95FR+9q45f9",
         {
             expiresIn: "2d",
         }
@@ -37,8 +37,9 @@ const isAuth = async (req, res, next) => {
     const { authorization } = req.headers;
     try {
         const token = authorization.split(" ")[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, "5r4se46e79y8hw786g4aew86rf746rtf4a6egh7498h468earf494ga6469gh4w4r5gy6e5g6e45g+9ea5gh+a6e5f+95FR+9q45f9");
         req.user = decoded;
+        console.log(decoded);
         next();
     } catch (err) {
         res.status(401).send({

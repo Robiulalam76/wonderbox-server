@@ -9,6 +9,9 @@ router.post("/register", registerUser);
 //login a user
 router.post('/login', loginUser);
 
+// get userinfo by token
+router.get('/me', isAuth, getUserInfo);
+
 // signup with social
 router.post('/signup/withsocial', signupWithSocial);
 
@@ -27,7 +30,6 @@ router.delete('/:id', isAuth, deleteUser);
 //update a user info
 router.patch('/:id', patchUserInfoById);
 
-// get userinfo by token
-router.get('/userinfo/me', isAuth, getUserInfo);
+
 
 module.exports = router;

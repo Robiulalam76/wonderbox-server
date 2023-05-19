@@ -6,7 +6,7 @@ const app = require('./app');
 // connect database
 const connectDB = async () => {
     try {
-        await mongoose.connect('mongodb://127.0.0.1:27017/wonderbox', {
+        await mongoose.connect('mongodb+srv://wonderbox:762485@cluster0.qcahanl.mongodb.net/', {
             // useFindAndModify: false,
             // useCreateIndex: true,
             useNewUrlParser: true,
