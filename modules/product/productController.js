@@ -4,7 +4,7 @@ const createProduct = async (req, res) => {
     try {
         const newProduct = new Product({
             title: req.body.title,
-            image: req.body.image,
+            images: req.body.images,
             storeId: req.body.storeId,
             storeName: req.body.storeName,
             price: req.body.price,

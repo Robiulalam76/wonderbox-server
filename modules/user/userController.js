@@ -32,9 +32,10 @@ const registerUser = async (req, res) => {
                 password: bcrypt.hashSync(password),
             });
             newUser.save();
-            // const token = signInToken({ name, email, password: bcrypt.hashSync(password) });
+            const token = signInToken({ name, email, password: bcrypt.hashSync(password) });
             res.send({
                 success: true,
+                token: token,
                 _id: newUser._id,
                 name: newUser.name,
                 email: newUser.email,
