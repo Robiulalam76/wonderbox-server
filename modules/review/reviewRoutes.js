@@ -1,5 +1,5 @@
 const express = require('express');
-const { createReview, getProductReviews, getProductRatingStatisticsAndReviews } = require('./reviewController');
+const { createReview, getProductReviews, deleteReview, updateReview } = require('./reviewController');
 
 const router = express.Router();
 
@@ -9,7 +9,10 @@ router.post('/', createReview);
 // Get all reviews for a product
 router.get('/:productId', getProductReviews);
 
-// Get all reviews and statices
-router.get('/reviews-and-statistics/:productId', getProductRatingStatisticsAndReviews);
+// Update a review
+router.put('/update/:reviewId', updateReview);
+
+// Delete a review
+router.delete('/delete/:reviewId', deleteReview);
 
 module.exports = router;

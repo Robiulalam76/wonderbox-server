@@ -17,7 +17,7 @@ const getProductReviews = async (req, res) => {
     try {
         const { productId } = req.params;
 
-        const reviews = await Review.find({ productId }).populate('reviewerId');
+        const reviews = await Review.find({ productId }).populate('reviewerId').sort({ _id: -1 });
         // Calculate the average rating
         const totalReviews = reviews.length;
         const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
@@ -52,69 +52,40 @@ const getProductReviews = async (req, res) => {
 
 
 
+// Update a review
+const updateReview = async (req, res) => {
+    const { reviewId } = req.params;
+    const { title, comment, rating, isPositive } = req.body;
 
-
-// Get rating statistics and reviews for a product
-const getProductRatingStatisticsAndReviews = async (req, res) => {
     try {
-        const { productId } = req.params;
-        console.log(productId);
-
-        const ratingStatistics = await Review.aggregate([
+        const updatedReview = await Review.findByIdAndUpdate(
+            reviewId,
             {
-                $match: { productId: productId }
+                title,
+                comment,
+                rating,
+                isPositive,
             },
-            {
-                $group: {
-                    _id: '$rating',
-                    count: { $sum: 1 }
-                }
-            },
-            {
-                $group: {
-                    _id: null,
-                    ratings: {
-                        $push: {
-                            rating: '$_id',
-                            count: '$count'
-                        }
-                    },
-                    totalReviewers: { $sum: '$count' },
-                    averageRating: { $avg: '$rating' }
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    ratings: 1,
-                    totalReviewers: 1,
-                    averageRating: { $round: ['$averageRating', 1] }
-                }
-            }
-        ]);
+            { new: true }
+        );
 
-        const reviews = await Review.find({ productId });
-
-        let ratingPercentage = {
-            5: 0,
-            4: 0,
-            3: 0,
-            2: 0,
-            1: 0
-        };
-
-        if (ratingStatistics.length > 0) {
-            const ratings = ratingStatistics[0].ratings;
-            const totalReviewers = ratingStatistics[0].totalReviewers;
-
-            ratings.forEach(rating => {
-                ratingPercentage[rating.rating] = (rating.count / totalReviewers) * 100;
-            });
-        }
-
-        res.json({ ratingPercentage, reviews, ...ratingStatistics[0] });
+        res.json(updatedReview);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to retrieve rating statistics and reviews' });
+        console.log('Error updating review:', error);
+        res.status(500).json({ error: 'An error occurred while updating the review' });
+    }
+};
+
+// Delete a review
+const deleteReview = async (req, res) => {
+    const { reviewId } = req.params;
+
+    try {
+        await Review.findByIdAndDelete(reviewId);
+        res.json({ message: 'Review deleted successfully' });
+    } catch (error) {
+        console.log('Error deleting review:', error);
+        res.status(500).json({ error: 'An error occurred while deleting the review' });
     }
 };
 
@@ -122,5 +93,6 @@ const getProductRatingStatisticsAndReviews = async (req, res) => {
 module.exports = {
     createReview,
     getProductReviews,
-    getProductRatingStatisticsAndReviews
+    updateReview,
+    deleteReview
 };
