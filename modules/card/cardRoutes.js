@@ -6,7 +6,7 @@ const router = express.Router();
 router.post("/", createCard);
 router.post("/createcard_after_verify", createCardAfterVerify);
 
-router.get("/getcards/:userId", getCardByUserId);
+router.get("/getcards/:userId/:type", getCardByUserId);
 
 
 module.exports = router

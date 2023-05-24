@@ -40,7 +40,12 @@ const createCardAfterVerify = async (req, res) => {
 
 const getCardByUserId = async (req, res) => {
     try {
-        const result = await Card.find({ userId: req.params.userId })
+        const result = await Card.find({
+            $and: [
+                { userId: req.params.userId },
+                { type: req.params?.type },
+            ]
+        })
         res.status(201).json({
             status: "success",
             data: result
