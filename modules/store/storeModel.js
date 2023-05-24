@@ -2,10 +2,23 @@ const mongoose = require("mongoose");
 
 const storeSchema = mongoose.Schema(
   {
+    name: {
+      type: String,
+      required: true
+    },
+    logo: {
+      type: String,
+      required: true,
+      default: "https://w7.pngwing.com/pngs/406/577/png-transparent-grocery-store-convenience-shop-retail-computer-icons-store-food-company-text.png"
+    },
+    images: {
+      type: [String],
+      required: false,
+    },
     verified: {
       type: String,
       enum: ['true', 'false'],
-      default: false
+      default: "false"
     },
     username: {
       type: String,

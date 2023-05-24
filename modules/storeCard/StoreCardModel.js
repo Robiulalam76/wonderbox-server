@@ -1,19 +1,11 @@
 const { default: mongoose } = require("mongoose");
 
-const cardSchema = new mongoose.Schema({
+const storeCardSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true
     },
     productId: {
-        type: String,
-        required: true
-    },
-    cardId: {
-        type: String,
-        required: false
-    },
-    userId: {
         type: String,
         required: true
     },
@@ -29,28 +21,32 @@ const cardSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    active: {
+    type: {
         type: String,
-        enum: ["true", "false"],
-        default: "true"
+        enum: ["Wallet", "Package"],
+        required: true
     },
     status: {
         type: String,
         enum: ["Show", "Hide"],
         default: "Show"
     },
+    active: {
+        type: String,
+        enum: ["true", "false"],
+        default: "false"
+    },
+    checkNumber: {
+        type: String,
+        required: true
+    },
+    securityCode: {
+        type: String,
+        required: true
+    },
     priveteKey: {
         type: String,
         required: true
-    },
-    type: {
-        type: String,
-        enum: ["Wallet", "Package"],
-        required: true
-    },
-    email: {
-        type: String,
-        required: false
     },
 },
     {
@@ -59,5 +55,5 @@ const cardSchema = new mongoose.Schema({
 )
 
 
-const Card = mongoose.model("Card", cardSchema);
-module.exports = Card
+const StoreCard = mongoose.model("StoreCard", storeCardSchema);
+module.exports = StoreCard

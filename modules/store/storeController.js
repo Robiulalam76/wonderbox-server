@@ -7,7 +7,8 @@ const addStore = async (req, res) => {
   try {
     const store = new Store({
       name: req.body.name,
-      image: req.body.image,
+      logo: req.body.logo,
+      images: req.body.images,
       username: req.body.name?.replaceAll(' ', '').toLowerCase(),
       userId: req.body.userId,
       description: req.body.description,
