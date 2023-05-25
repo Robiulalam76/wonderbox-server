@@ -34,11 +34,6 @@ const cardSchema = new mongoose.Schema({
         enum: ["true", "false"],
         default: "true"
     },
-    status: {
-        type: String,
-        enum: ["Show", "Hide"],
-        default: "Show"
-    },
     priveteKey: {
         type: String,
         required: true
