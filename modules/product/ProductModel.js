@@ -59,11 +59,6 @@ const productSchema = new mongoose.Schema(
             enum: ["wallet", "package"],
             required: true
         },
-        active: {
-            type: String,
-            enum: ["true", "false"],
-            default: "false"
-        },
         status: {
             type: String,
             enum: ["Show", "Hide"],

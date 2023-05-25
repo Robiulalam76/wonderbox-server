@@ -1,4 +1,6 @@
+const Review = require("../review/ReviewModel");
 const Product = require("./ProductModel");
+const { getTopRankingProductsByStoreId, getProductsByStoreIdWithRating } = require("./productServices");
 
 const createProduct = async (req, res) => {
     try {
@@ -38,8 +40,33 @@ const createProduct = async (req, res) => {
 
 const getShowingProducts = async (req, res) => {
     try {
-        const products = await Product.find({ status: "Show", active: "true" }).sort({ _id: -1 });
-        res.send(products);
+        // const products = await Product.find({ status: "Show", active: "true" }).sort({ _id: -1 });
+
+        const products = await Product.find({ status: "Show" }).sort({ _id: -1 });
+        const productIds = products.map((product) => product._id);
+
+        const productRatings = await Review.aggregate([
+            {
+                $match: { productId: { $in: productIds } }
+            },
+            {
+                $group: {
+                    _id: '$productId',
+                    averageRating: { $avg: '$rating' }
+                }
+            }
+        ]);
+
+        const productsWithRating = products.map((product) => {
+            const rating = productRatings.find((rating) => rating._id.toString() === product._id.toString());
+            return {
+                ...product.toObject(),
+                rating: Math.ceil(rating ? rating.averageRating : 0)
+            };
+        });
+
+
+        res.send(productsWithRating);
     } catch (err) {
         res.status(500).send({
             message: err.message,
@@ -156,6 +183,35 @@ const getProductsByStoreId = async (req, res) => {
         });
     }
 };
+
+// get products by store id
+const getShowProductsByStoreId = async (req, res) => {
+    console.log(req.params.id);
+    try {
+        const product = await getProductsByStoreIdWithRating(req.params.id);
+        // console.log(product);
+        res.send(product);
+    } catch (err) {
+        res.status(500).send({
+            message: err.message,
+        });
+    }
+};
+
+
+// get top ranking products
+const topRankingProducts = async (req, res) => {
+    try {
+        const { storeId } = req.params;
+        const topRankingProducts = await getTopRankingProductsByStoreId(storeId);
+
+        res.json(topRankingProducts);
+    } catch (error) {
+        console.error('Error retrieving top ranking products:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
 
 const updateProduct = async (req, res) => {
     try {
@@ -364,6 +420,9 @@ const getAllProductsByRole = async (req, res) => {
 module.exports = {
     createProduct,
     getProductsByStoreId,
+    getShowProductsByStoreId,
+    topRankingProducts,
+
     getAllProducts,
     getShowingProducts,
     getDiscountedProducts,
