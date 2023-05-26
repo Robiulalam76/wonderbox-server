@@ -63,7 +63,7 @@ const getTopRankingProductsByStoreId = async (storeId) => {
             const rating = topRankingProducts.find((rating) => rating._id.toString() === product._id.toString());
             return {
                 ...product.toObject(),
-                rating: rating ? rating.averageRating : 0 // Add average rating to each product
+                rating: Math.ceil(rating ? rating.averageRating : 0) // Add average rating to each product
             };
         });
 
@@ -78,7 +78,42 @@ const getTopRankingProductsByStoreId = async (storeId) => {
 
 
 
+const findLatestProductByStore = async (storeId) => {
+    try {
+        const products = await Product.find({ storeId: storeId, status: "Show" });
+        const productIds = products.map((product) => product._id);
+
+        const productRatings = await Review.aggregate([
+            {
+                $match: { productId: { $in: productIds } }
+            },
+            {
+                $group: {
+                    _id: '$productId',
+                    averageRating: { $avg: '$rating' }
+                }
+            }
+        ]);
+
+        const productsWithRating = products.map((product) => {
+            const rating = productRatings.find((rating) => rating._id.toString() === product._id.toString());
+            return {
+                ...product.toObject(),
+                rating: Math.ceil(rating ? rating.averageRating : 0)
+            };
+        });
+
+        return productsWithRating;
+    } catch (error) {
+        console.error('Error retrieving products by storeId with rating:', error);
+        throw error;
+    }
+};
+
+
+
 module.exports = {
     getProductsByStoreIdWithRating,
     getTopRankingProductsByStoreId,
+    findLatestProductByStore,
 }

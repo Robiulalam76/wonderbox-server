@@ -1,6 +1,6 @@
 const express = require("express");
 const { isAuth } = require("../../config/auth");
-const { createProduct, getProductById, getShowingProducts, getDiscountedProducts, getAllProducts, getLatestProducts, getStockOutProducts, getProductBySlug, getProductsByParent, getProductsBySlugAndChildrenSlug, getSearchProducts, updateProduct, updateStatus, deleteProduct, getAllProductsByRole, getProductsByStoreId, getShowProductsByStoreId, topRankingProducts } = require("./productController");
+const { createProduct, getProductById, getShowingProducts, getDiscountedProducts, getAllProducts, getLatestProducts, getStockOutProducts, getProductBySlug, getProductsByParent, getProductsBySlugAndChildrenSlug, getSearchProducts, updateProduct, updateStatus, deleteProduct, getAllProductsByRole, getProductsByStoreId, getShowProductsByStoreId, topRankingProducts, getLatestProductByStore } = require("./productController");
 const router = express.Router();
 
 // new product
@@ -17,6 +17,12 @@ router.get("/store/show-products/:id", getShowProductsByStoreId);
 // top ranking products by store id
 router.get('/top-ranking-products/:storeId', topRankingProducts);
 
+//get all latest products
+router.get("/latest/:storeId", getLatestProductByStore);
+
+//get all latest products
+router.get("/getProducts/latest", getLatestProducts);
+
 //get showing products only
 router.get("/show/all", getShowingProducts);
 
@@ -27,8 +33,6 @@ router.get("/discount/all", getDiscountedProducts);
 router.get("/", getAllProducts);
 
 
-//get all latest products
-router.get("/getProducts/latest", getLatestProducts);
 
 //get all stock out products
 router.get("/stock-out", getStockOutProducts);

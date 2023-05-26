@@ -213,6 +213,20 @@ const topRankingProducts = async (req, res) => {
 };
 
 
+// get latest product by storeId with ratings
+const getLatestProductByStore = async (req, res) => {
+    try {
+        const { storeId } = req.params;
+        const products = await getTopRankingProductsByStoreId(storeId);
+
+        res.json(products);
+    } catch (error) {
+        console.error('Error retrieving top ranking products:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
+
 const updateProduct = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
@@ -422,6 +436,7 @@ module.exports = {
     getProductsByStoreId,
     getShowProductsByStoreId,
     topRankingProducts,
+    getLatestProductByStore,
 
     getAllProducts,
     getShowingProducts,
