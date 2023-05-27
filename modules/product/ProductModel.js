@@ -12,10 +12,7 @@ const productSchema = new mongoose.Schema(
         },
         storeId: {
             type: String,
-            required: true,
-        },
-        storeName: {
-            type: String,
+            ref: "Store",
             required: true,
         },
         price: {
@@ -56,13 +53,13 @@ const productSchema = new mongoose.Schema(
         },
         type: {
             type: String,
-            enum: ["wallet", "package"],
+            enum: ["Wallet", "Package"],
             required: true
         },
         status: {
             type: String,
             enum: ["Show", "Hide"],
-            default: "Hide"
+            default: "Show"
         }
     },
     {

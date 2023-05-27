@@ -8,7 +8,6 @@ const createProduct = async (req, res) => {
             title: req.body.title,
             images: req.body.images,
             storeId: req.body.storeId,
-            storeName: req.body.storeName,
             price: req.body.price,
             discount: req.body.discount,
             features: req.body.features,

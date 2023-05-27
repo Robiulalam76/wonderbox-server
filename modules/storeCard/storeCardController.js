@@ -14,6 +14,20 @@ const createStoreCard = async (req, res) => {
 }
 
 
+
+const getAllCards = async (req, res) => {
+    try {
+        const cards = await StoreCard.find({}).sort({ _id: -1 });
+        res.status(200).send(cards)
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: error.message
+        });
+    }
+}
+
+
 // verify card
 const verifyCard = async (req, res) => {
     try {
@@ -69,6 +83,7 @@ const getStoreCardByStoreId = async (req, res) => {
 
 module.exports = {
     createStoreCard,
+    getAllCards,
     getStoreCardByStoreId,
     verifyCard,
 }
