@@ -59,8 +59,23 @@ const getCardByUserId = async (req, res) => {
 }
 
 
+// get all orders by store id
+const getOrderCardsByStoreId = async (req, res) => {
+    try {
+        const cards = await Card.find({ storeId: req.params.storeId })
+        res.status(201).send(cards);
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: error.message
+        });
+    }
+}
+
+
 module.exports = {
     createCard,
     createCardAfterVerify,
     getCardByUserId,
+    getOrderCardsByStoreId,
 }

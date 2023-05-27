@@ -50,8 +50,7 @@ const verifyCard = async (req, res) => {
 
 
 
-// get card by user id
-
+// get card by store id
 const getStoreCardByStoreId = async (req, res) => {
     try {
         const result = await StoreCard.find({ storeId: req.params.storeId })

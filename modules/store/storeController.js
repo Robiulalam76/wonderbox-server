@@ -206,6 +206,19 @@ const getAllStoresByRole = async (req, res) => {
 
 
 
+// get all orders by store id
+// const getOdersByStoreId = async (req, res) => {
+//   try {
+// const orders = await 
+//   } catch (error) {
+//     res.status(500).send({
+//       message: error.message,
+//     });
+//   }
+// }
+
+
+
 module.exports = {
   addStore,
   getStoreByUsername,
