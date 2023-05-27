@@ -13,12 +13,13 @@ const storeSchema = mongoose.Schema(
     },
     images: {
       type: [String],
+      default: ["https://t3.ftcdn.net/jpg/02/62/18/46/360_F_262184611_bXhmboL9oE6k2ILu4qXxNWFhNJCEbTn2.jpg"],
       required: false,
     },
     verified: {
-      type: String,
-      enum: ['true', 'false'],
-      default: "false"
+      type: Boolean,
+      enum: [true, false],
+      default: false
     },
     username: {
       type: String,
@@ -27,11 +28,6 @@ const storeSchema = mongoose.Schema(
     },
     userId: {
       type: String,
-      required: true
-    },
-
-    business_type: {
-      type: [String],
       required: true
     },
     street: {
@@ -46,11 +42,7 @@ const storeSchema = mongoose.Schema(
       type: String,
       required: true
     },
-    postal_code: {
-      type: String,
-      required: true
-    },
-    date_attended: {
+    postalCode: {
       type: String,
       required: true
     },
@@ -58,6 +50,14 @@ const storeSchema = mongoose.Schema(
       type: String,
       default: "Show",
       enum: ["Show", "Hide"],
+    },
+    email: {
+      type: String,
+      required: true
+    },
+    description: {
+      type: String,
+      required: true
     },
     crateAt: {
       type: Date,

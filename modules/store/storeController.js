@@ -4,14 +4,19 @@ const Store = require("./storeModel");
 
 const addStore = async (req, res) => {
   try {
+    console.log(req.body);
     const store = new Store({
       name: req.body.name,
       logo: req.body.logo,
       images: req.body.images,
-      username: req.body.name?.replaceAll(' ', '').toLowerCase(),
+      username: req.body.username?.replaceAll(' ', '').toLowerCase(),
       userId: req.body.userId,
-      description: req.body.description,
-      address: req.body.address,
+      street: req.body.street,
+      city: req.body.city,
+      country: req.body.country,
+      postalCode: req.body.postalCode,
+      email: req.body.email,
+      description: req.body.description
     });
     const createdStore = await store.save();
     res.status(201).json(createdStore);
@@ -90,9 +95,10 @@ const deleteSingleStore = async (req, res) => {
   });
 };
 
-const getVerifiedStores = async (req, res) => {
-  const store = await Store.find({ verified: true });
 
+// get verified stores
+const getVerifiedStores = async (req, res) => {
+  const store = await Store.find({ verified: true }).limit(8);
   if (!store) {
     res.status(200);
     throw new Error("Order list is empty..");
@@ -101,48 +107,39 @@ const getVerifiedStores = async (req, res) => {
 };
 
 
-const updateStatus = async (req, res) => {
-  const newStatus = req.body.status;
-  console.log(newStatus);
-
+// update store info
+const updateStoreByStoreId = async (req, res) => {
   try {
-
-    const findCategory = await Store.findById({ _id: req.params.id })
-    if (findCategory) {
-      const result = await Store.updateOne(
-        { _id: req.params.id },
-        {
-          $set: {
-            status: newStatus,
-          },
-        },
-      )
-      res.status(200).send({
-        message: `Category ${newStatus} Successfully!`,
-      });
-    }
-    else {
-      res.status(500).send({
-        message: "Category Not Found",
-      });
-    }
-
-  }
-  catch (error) {
-    res.status(500).send({
-      message: err.message,
+    const { storeId } = req.params;
+    console.log(storeId);
+    const result = await Store.updateOne(
+      { _id: storeId },
+      { $set: req.body },
+      { runValidators: true }
+    );
+    res.status(200).json({
+      status: "success",
+      message: "Update successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "error",
+      message: "upadate couldn't success",
+      error: error.message,
     });
   }
 };
 
 
+
+
 const getAllStoresByRole = async (req, res) => {
   try {
     const { _id } = req.user
-    const isAdmin = await Admin.findById({ _id: _id })
     const isSeller = await User.findById({ _id: _id })
 
-    if (isAdmin && isAdmin?.role === "admin") {
+    if (isSeller?.role === "admin") {
       const stores = await Store.find({});
       res.send(stores);
     }
@@ -163,20 +160,6 @@ const getAllStoresByRole = async (req, res) => {
 }
 
 
-// handle function call to updated property
-async function addProperty() {
-  try {
-    const result = await Store.updateMany({}, { status: "Show" });
-    console.log(`${result.nModified} products updated`);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    // close the database connection
-    await mongoose.connection.close();
-  }
-}
-
-
 
 module.exports = {
   addStore,
@@ -186,8 +169,7 @@ module.exports = {
   addStoreBySeller,
   deleteSingleStore,
   getVerifiedStores,
+  updateStoreByStoreId,
 
-  updateStatus,
   getAllStoresByRole,
-  addProperty
 };

@@ -10,7 +10,7 @@ const {
   deleteSingleStore,
   getVerifiedStores,
   getAllStoresByRole,
-  updateStatus,
+  updateStoreByStoreId,
 } = require("../store/storeController");
 const { isAuth } = require("../../config/auth");
 
@@ -20,12 +20,10 @@ router.route("/:id").get(getStoreById);
 router.get("/getInfo/:username", getStoreByUsername);
 router.post("/add/:id", addStoreBySeller);
 router.delete("/:id", deleteSingleStore);
-// router.route("/myorders").get(protect, getMyOrders);
-// router.route('/:id/pay').put(protect, updateOrderToPaid)
-// router.route('/:id/deliver').put(protect, admin, updateOrderToDelivered);
 
+// update store info by store id
+router.patch("/update/:storeId", updateStoreByStoreId)
 
-router.put("/status/:id", isAuth, updateStatus)
 router.get("/getAllStores/byRole", isAuth, getAllStoresByRole)
 
 module.exports = router;
