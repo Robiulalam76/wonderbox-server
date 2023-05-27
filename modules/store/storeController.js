@@ -1,4 +1,3 @@
-const Admin = require("../admin/AdminModel");
 const User = require("../user/UserModel");
 const Store = require("./storeModel");
 

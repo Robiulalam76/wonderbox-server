@@ -1,6 +1,5 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const Admin = require("../modules/admin/AdminModel");
 
 const signInToken = (user) => {
     console.log(user, "yydf");
@@ -50,22 +49,22 @@ const isAuth = async (req, res, next) => {
 
 
 
-const isAdmin = async (req, res, next) => {
-    const admin = await Admin.findOne({ role: "admin" });
-    if (admin) {
-        next();
-    } else {
-        res.status(401).send({
-            message: "User is not Admin",
-        });
-    }
-};
+// const isAdmin = async (req, res, next) => {
+//     const admin = await Admin.findOne({ role: "admin" });
+//     if (admin) {
+//         next();
+//     } else {
+//         res.status(401).send({
+//             message: "User is not Admin",
+//         });
+//     }
+// };
 
 
 module.exports = {
     signInToken,
     tokenForVerify,
     isAuth,
-    isAdmin,
+    // isAdmin,
     // sendEmail,
 };

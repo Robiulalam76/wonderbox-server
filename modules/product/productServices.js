@@ -27,6 +27,8 @@ const getProductsByStoreIdWithRating = async (storeId) => {
             };
         });
 
+        const sortedProducts = productsWithRating.sort((a, b) => b.rating - a.rating); // Sort products by rating in 
+
         return productsWithRating;
     } catch (error) {
         console.error('Error retrieving products by storeId with rating:', error);

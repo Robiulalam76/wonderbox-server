@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            enum: ['seller', 'buyer'],
+            enum: ['seller', 'buyer', 'admin'],
             default: 'seller'
         },
         password: {
@@ -45,7 +45,7 @@ const userSchema = new mongoose.Schema(
         verified: {
             type: String,
             enum: ['true', 'false'],
-            default: false
+            default: "false"
         },
 
         createWith: {

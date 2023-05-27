@@ -1,7 +1,6 @@
 const User = require("./UserModel");
 const bcrypt = require('bcryptjs');
 const { signInToken } = require("../../config/auth");
-const Admin = require("../admin/AdminModel");
 
 const registerUser = async (req, res) => {
     const {
@@ -261,7 +260,7 @@ const deleteUser = async (req, res) => {
 
     try {
         const { _id } = req.user
-        const isAdmin = await Admin.findById({ _id: _id })
+        const isAdmin = await User.findById({ _id: _id })
         if (isAdmin?.role === 'admin') {
             const result = await User.deleteOne({ _id: req.params.id })
             res.status(200).send({
