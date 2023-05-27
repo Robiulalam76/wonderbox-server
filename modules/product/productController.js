@@ -36,6 +36,20 @@ const createProduct = async (req, res) => {
 }
 
 
+const allProducts = async (req, res) => {
+    try {
+        const products = await Product.find({}).sort({ _id: -1 })
+        res.status(201).send(products)
+    } catch (error) {
+        res.status(400).json({
+            status: "error",
+            message: "Data couldn't insert",
+            error: error.message,
+        });
+    }
+}
+
+
 
 const getShowingProducts = async (req, res) => {
     try {
@@ -391,7 +405,7 @@ const getSearchProducts = async (req, res) => {
 const getAllProductsByRole = async (req, res) => {
     try {
         const { _id } = req.user
-        const isAdmin = await Admin.findById({ _id: _id })
+        const isAdmin = await User.findById({ _id: _id })
         const isSeller = await User.findById({ _id: _id })
 
         // console.log(isAdmin, isSeller, _id);
@@ -432,6 +446,7 @@ const getAllProductsByRole = async (req, res) => {
 
 module.exports = {
     createProduct,
+    allProducts,
     getProductsByStoreId,
     getShowProductsByStoreId,
     topRankingProducts,
