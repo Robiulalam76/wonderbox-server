@@ -28,6 +28,7 @@ const storeSchema = mongoose.Schema(
     },
     userId: {
       type: String,
+      ref: "User",
       required: true
     },
     street: {

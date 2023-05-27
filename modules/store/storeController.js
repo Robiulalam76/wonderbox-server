@@ -32,7 +32,7 @@ const addStore = async (req, res) => {
 
 
 const getStore = async (req, res) => {
-  const store = await Store.find({ status: "Show" });
+  const store = await Store.find({ status: "Show" }).populate("userId");
 
   if (!store) {
     res.status(200);
@@ -69,24 +69,39 @@ const getStoreByUsername = async (req, res) => {
 };
 
 const addStoreBySeller = async (req, res) => {
-  const { name, description, address } = req.body;
-  const user = await User.findOne({ _id: req.params.id })
-  if (user?.role === 'seller') {
-    const store = new Store({
-      userId: req.params.body,
-      name,
-      description,
-      address,
+  try {
+    const isSeller = await User.findById({ _id: req.params.id })
+    if (isSeller.role === "seller") {
+      const store = new Store({
+        name: req.body.name,
+        logo: req.body.logo,
+        images: req.body.images,
+        username: req.body.username?.replaceAll(' ', '').toLowerCase(),
+        userId: req.body.userId,
+        street: req.body.street,
+        city: req.body.city,
+        country: req.body.country,
+        postalCode: req.body.postalCode,
+        email: req.body.email,
+        description: req.body.description
+      });
+      const createdStore = await store.save();
+      res.status(201).json(createdStore);
+    }
+    else {
+      res.status(500).json({
+        status: "error",
+        message: "only Seller Can Be added"
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message
     });
-    const createdStore = await store.save();
-    res.status(201).json(createdStore);
   }
-  else {
-    res.status(201).send({
-      message: 'only seller and Admit can be added'
-    })
-  }
-};
+}
+
 
 const deleteSingleStore = async (req, res) => {
   await Store.deleteOne({ _id: req.params.id });
