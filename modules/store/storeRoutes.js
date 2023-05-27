@@ -11,6 +11,7 @@ const {
   getVerifiedStores,
   getAllStoresByRole,
   updateStoreByStoreId,
+  updateUsername,
 } = require("../store/storeController");
 const { isAuth } = require("../../config/auth");
 
@@ -23,6 +24,9 @@ router.delete("/:id", deleteSingleStore);
 
 // update store info by store id
 router.patch("/update/:storeId", updateStoreByStoreId)
+
+// change store info by store id
+router.patch("/username/:storeId", updateUsername)
 
 router.get("/getAllStores/byRole", isAuth, getAllStoresByRole)
 

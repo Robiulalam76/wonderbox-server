@@ -132,6 +132,51 @@ const updateStoreByStoreId = async (req, res) => {
 };
 
 
+// change store username by id
+const updateUsername = async (req, res) => {
+  try {
+    const { storeId } = req.params;
+    if (req.body) {
+      const findUsername = await Store.findOne({ username: req.body.username })
+      if (findUsername) {
+        return res.status(400).json({
+          status: "error",
+          message: "Username already in use",
+          error: "upadate couldn't success",
+        });
+      }
+      else {
+        const result = await Store.updateOne(
+          { _id: storeId },
+          { $set: req.body },
+          { runValidators: true }
+        );
+        return res.status(200).json({
+          status: "success",
+          message: "username Update successfully",
+          data: result,
+        });
+      }
+    }
+    else {
+      return res.status(400).json({
+        status: "error",
+        message: "Please Provide new Username",
+        error: "Data not found",
+      });
+    }
+
+  }
+  catch (error) {
+    res.status(400).json({
+      status: "error",
+      message: "upadate couldn't success",
+      error: error.message,
+    });
+  }
+};
+
+
 
 
 const getAllStoresByRole = async (req, res) => {
@@ -170,6 +215,7 @@ module.exports = {
   deleteSingleStore,
   getVerifiedStores,
   updateStoreByStoreId,
+  updateUsername,
 
   getAllStoresByRole,
 };
