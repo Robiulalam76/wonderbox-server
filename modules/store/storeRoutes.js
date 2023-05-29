@@ -28,6 +28,6 @@ router.patch("/update/:storeId", updateStoreByStoreId)
 // change store info by store id
 router.patch("/username/:storeId", updateUsername)
 
-router.get("/getAllStores/byRole", isAuth, getAllStoresByRole)
+router.get("/getAllStores/byRole/:userId", getAllStoresByRole)
 
 module.exports = router;

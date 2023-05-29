@@ -196,15 +196,15 @@ const updateUsername = async (req, res) => {
 
 const getAllStoresByRole = async (req, res) => {
   try {
-    const { _id } = req.user
-    const isSeller = await User.findById({ _id: _id })
+    const { userId } = req.params
+    const isUser = await User.findById({ _id: userId })
 
-    if (isSeller?.role === "admin") {
+    if (isUser?.role === "admin") {
       const stores = await Store.find({});
       res.send(stores);
     }
-    else if (isSeller && isSeller?.role === "seller") {
-      const stores = await Store.find({ userId: _id })
+    else if (isUser && isUser?.role === "seller") {
+      const stores = await Store.find({ userId: userId })
       res.send(stores);
     }
     else {

@@ -1,6 +1,6 @@
 const express = require("express");
 const { isAuth } = require("../../config/auth");
-const { createProduct, getProductById, getShowingProducts, getDiscountedProducts, getAllProducts, getLatestProducts, getStockOutProducts, getProductBySlug, getProductsByParent, getProductsBySlugAndChildrenSlug, getSearchProducts, updateProduct, updateStatus, deleteProduct, getAllProductsByRole, getProductsByStoreId, getShowProductsByStoreId, topRankingProducts, getLatestProductByStore, allProducts } = require("./productController");
+const { createProduct, getProductById, getShowingProducts, getDiscountedProducts, getAllProducts, getLatestProducts, getStockOutProducts, getProductBySlug, getProductsByParent, getProductsBySlugAndChildrenSlug, getSearchProducts, updateProduct, updateStatus, deleteProduct, getAllProductsByRole, getProductsByStoreId, getShowProductsByStoreId, topRankingProducts, getLatestProductByStore, allProducts, updateProductById } = require("./productController");
 const router = express.Router();
 
 // new product
@@ -53,6 +53,10 @@ router.get("/search/:searchtitle", getSearchProducts);
 //update a product
 router.put("/:id", updateProduct);
 
+
+//update a product
+router.patch("/update/:productId", updateProductById);
+
 //update a product status
 router.put("/status/:id", updateStatus);
 
@@ -60,6 +64,6 @@ router.put("/status/:id", updateStatus);
 router.delete("/:id", deleteProduct);
 
 // ---------------------- dashboard Routes --------------------
-router.get("/getAllProducts/byRole", isAuth, getAllProductsByRole)
+router.get("/getAllProducts/byRole/:userId", getAllProductsByRole)
 
 module.exports = router;

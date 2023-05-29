@@ -185,10 +185,8 @@ const getProductById = async (req, res) => {
 
 // get products by store id
 const getProductsByStoreId = async (req, res) => {
-    console.log(req.params.id);
     try {
         const product = await Product.find({ storeId: req.params.id });
-        // console.log(product);
         res.send(product);
     } catch (err) {
         res.status(500).send({
@@ -240,11 +238,33 @@ const getLatestProductByStore = async (req, res) => {
 }
 
 
+const updateProductById = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const result = await Product.updateOne(
+            { _id: productId },
+            { $set: req.body },
+            { runValidators: true }
+        );
+        res.status(200).json({
+            status: "success",
+            message: "Update successfully",
+            data: result,
+        });
+    } catch (error) {
+        res.status(400).json({
+            status: "error",
+            message: "upadate couldn't success",
+            error: error.message,
+        });
+    }
+}
+
+
 const updateProduct = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (product) {
-            product.sku = req.body.sku;
             product.title = req.body.title;
             product.slug = req.body.slug;
             product.description = req.body.description;
@@ -404,18 +424,15 @@ const getSearchProducts = async (req, res) => {
 // get all products by role
 const getAllProductsByRole = async (req, res) => {
     try {
-        const { _id } = req.user
-        const isAdmin = await User.findById({ _id: _id })
-        const isSeller = await User.findById({ _id: _id })
+        const { userId } = req.params
+        const isUser = await User.findById({ _id: userId })
 
-        // console.log(isAdmin, isSeller, _id);
-
-        if (isAdmin && isAdmin?.role === "admin") {
+        if (isUser && isUser?.role === "admin") {
             const products = await Product.find({}).sort({ _id: -1 });
             res.send(products);
         }
-        else if (isSeller && isSeller?.role === "seller") {
-            const products = await Product.find({ sellerId: _id }).sort({ _id: -1 });
+        else if (isUser && isUser?.role === "seller") {
+            const products = await Product.find({ sellerId: userId }).sort({ _id: -1 });
             res.send(products);
         }
         else {
@@ -451,6 +468,7 @@ module.exports = {
     getShowProductsByStoreId,
     topRankingProducts,
     getLatestProductByStore,
+    updateProductById,
 
     getAllProducts,
     getShowingProducts,
