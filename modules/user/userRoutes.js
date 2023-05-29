@@ -25,7 +25,7 @@ router.get('/:id', getUserById);
 router.put('/:id', updateUser);
 
 //delete a user
-router.delete('/:id', isAuth, deleteUser);
+router.delete('/:userId/:adminId', deleteUser);
 
 //update a user info
 router.patch('/:id', patchUserInfoById);

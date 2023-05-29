@@ -257,12 +257,11 @@ const patchUserInfoById = async (req, res) => {
 }
 
 const deleteUser = async (req, res) => {
-
     try {
-        const { _id } = req.user
-        const isAdmin = await User.findById({ _id: _id })
+        const { adminId } = req.params
+        const isAdmin = await User.findById({ _id: adminId })
         if (isAdmin?.role === 'admin') {
-            const result = await User.deleteOne({ _id: req.params.id })
+            const result = await User.deleteOne({ _id: req.params.userId })
             res.status(200).send({
                 message: "User Delete Successfully!",
             });
