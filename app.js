@@ -20,6 +20,7 @@ const cardRoutes = require("./modules/card/cardRoutes");
 const storeCardRoutes = require("./modules/storeCard/storeCardRoutes");
 const reviewRoutes = require("./modules/review/reviewRoutes");
 const addressRoutes = require("./modules/address/addressRoutes");
+const historyRoutes = require("./modules/history/historyRoutes");
 
 
 // api routes
@@ -30,9 +31,7 @@ app.use("/api/card", cardRoutes);
 app.use("/api/storecard", storeCardRoutes);
 app.use("/api/review", reviewRoutes);
 app.use("/api/address", addressRoutes);
-
-
-
+app.use("/api/history", historyRoutes);
 
 
 
