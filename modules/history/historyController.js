@@ -52,7 +52,15 @@ const getHistoryByStoreId = async (req, res) => {
         }
         else if (findUser?.role === "seller") {
             const findStores = Store.find({ userId: req.params.roleId })
-            const histories = await History.find({ to: { $in: findStores?._id } })
+            // const histories = await History.find({ to: { $in: findStores?._id } })
+            const histories = await History.find(
+                {
+                    $or: [
+                        { to: { $in: findStores?._id } },
+                        { to: roleId },
+                        { from: roleId }
+                    ]
+                })
                 .sort({ timestamp: -1 })  // Sort by the 'timestamp' field in descending order
                 .exec();
             res.status(200).send(histories)

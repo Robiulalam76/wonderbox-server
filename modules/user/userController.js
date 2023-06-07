@@ -139,7 +139,6 @@ const signupWithSocial = async (req, res) => {
         const findEmail = await User.findOne({ email: req.body.email })
 
         if (findEmail && findEmail?.createWith === "google") {
-            console.log("ace user");
             const token = signInToken(findEmail);
             res.status(200).json({
                 token,
@@ -148,14 +147,14 @@ const signupWithSocial = async (req, res) => {
             });
         }
         else {
-            const newUser = {
+            const newUser = new User({
                 email: req.body.email,
                 name: req.body.name && req.body.name,
-                image: req.body.image,
+                image: req.body.image && req.body.image,
                 createWith: req.body.createWith,
                 verified: req.body.verified
-            }
-            const result = await User.create(newUser)
+            })
+            newUser.save()
                 .then(async savedUser => {
                     const newHistory = new History({
                         activityId: savedUser._id,
@@ -164,7 +163,8 @@ const signupWithSocial = async (req, res) => {
                         to: savedUser?._id
                     })
                     await newHistory.save()
-                    const token = signInToken(result);
+                    const token = signInToken(savedUser);
+                    console.log(token);
                     res.status(200).json({
                         token,
                         success: true,
