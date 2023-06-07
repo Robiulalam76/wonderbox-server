@@ -1,4 +1,5 @@
-const History = require("../history/HistoryModel");
+
+const Notification = require("../notification/NotificationModel");
 const StoreCard = require("../storeCard/StoreCardModel");
 const Card = require("./CardModel");
 
@@ -7,14 +8,14 @@ const createCard = async (req, res) => {
         const newCard = new Card(req.body);
         newCard.save()
             .then(async savedCard => {
-                const newHistory = new History({
+                const newNotification = new Notification({
                     activityId: savedCard._id,
                     title: "New Order Received: Order",
                     type: "new_order",
                     from: req.body.userId,
                     to: req.body.storeId
                 })
-                await newHistory.save()
+                await newNotification.save()
                 res.status(200).json({
                     status: "success",
                     message: "New Card Add Success"
@@ -42,14 +43,14 @@ const createCardAfterVerify = async (req, res) => {
         const newCard = new Card(req.body);
         newCard.save()
             .then(async savedCard => {
-                const newHistory = new History({
+                const newNotification = new Notification({
                     activityId: savedCard._id,
                     title: "New Card Redeem: Order",
                     type: "new_order",
                     from: req.body.userId,
                     to: req.body.storeId
                 })
-                await newHistory.save()
+                await newNotification.save()
                 const updateStatus = await StoreCard.findByIdAndUpdate(
                     req.body.cardId,
                     { $set: { active: true } },

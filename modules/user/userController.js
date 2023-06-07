@@ -1,7 +1,7 @@
 const User = require("./UserModel");
 const bcrypt = require('bcryptjs');
 const { signInToken } = require("../../config/auth");
-const History = require("../history/HistoryModel");
+const Notification = require("../notification/NotificationModel");
 
 const registerUser = async (req, res) => {
     const {
@@ -33,7 +33,7 @@ const registerUser = async (req, res) => {
             });
             newUser.save()
                 .then(async savedUser => {
-                    const newHistory = new History({
+                    const newHistory = new Notification({
                         activityId: savedUser._id,
                         title: "New Account Create Successfull!",
                         type: "new_user",
@@ -156,7 +156,7 @@ const signupWithSocial = async (req, res) => {
             })
             newUser.save()
                 .then(async savedUser => {
-                    const newHistory = new History({
+                    const newHistory = new Notification({
                         activityId: savedUser._id,
                         title: "New Account Create Successfull!",
                         type: "new_user",

@@ -1,4 +1,4 @@
-const History = require("../history/HistoryModel");
+const Notification = require("../notification/NotificationModel");
 const Review = require("./ReviewModel");
 
 
@@ -15,14 +15,14 @@ const createReview = async (req, res) => {
         });
         newReview.save()
             .then(async savedReview => {
-                const newHistory = new History({
+                const newNotification = new Notification({
                     activityId: savedReview._id,
                     title: "New Product Review Submitted",
                     type: "review",
                     from: req.body.reviewerId,
                     to: req.body.storeId
                 })
-                await newHistory.save()
+                await newNotification.save()
                 res.status(200).json({
                     status: "success",
                     message: "New Review Add Success"

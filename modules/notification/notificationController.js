@@ -1,20 +1,20 @@
 const Store = require("../store/storeModel")
 const User = require("../user/UserModel")
-const History = require("./HistoryModel")
+const Notification = require("./NotificationModel")
 
-const createHistory = async (req, res) => {
+const createNotification = async (req, res) => {
     try {
-        const newHistory = new History({
+        const newNotification = new Notification({
             activityId: req.body.activityId,
             title: req.body.title,
             type: req.body.type,
             from: req.body.from,
             to: req.body.to
         })
-        await newHistory.save()
+        await newNotification.save()
         res.status(200).json({
             status: "success",
-            message: "new history added"
+            message: "new Notification added"
         })
     } catch (error) {
         res.status(500).json({
@@ -26,11 +26,11 @@ const createHistory = async (req, res) => {
 
 
 // get all history by user id
-const getHistoryByUserId = async (req, res) => {
+const getNotificationByUserId = async (req, res) => {
     try {
         const { userId } = req.params;
-        const histories = await History.find({ $or: [{ to: userId }, { from: userId }] }).sort({ _id: -1 });
-        res.status(200).send(histories);
+        const notifications = await Notification.find({ $or: [{ to: userId }, { from: userId }] }).sort({ _id: -1 });
+        res.status(200).send(notifications);
     } catch (error) {
         res.status(500).json({
             status: "error",
@@ -40,30 +40,32 @@ const getHistoryByUserId = async (req, res) => {
 };
 
 // get all history by store id
-const getHistoryByStoreId = async (req, res) => {
+const getNotificationByStoreId = async (req, res) => {
     try {
         const findUser = await User.findOne({ _id: req.params.roleId })
 
         if (findUser?.role === "admin") {
-            const histories = await History.find({})
+            const notifications = await Notification.find({})
                 .sort({ timestamp: -1 })  // Sort by the 'timestamp' field in descending order
                 .exec();
-            res.status(200).send(histories)
+            res.status(200).send(notifications)
         }
         else if (findUser?.role === "seller") {
-            const findStores = Store.find({ userId: req.params.roleId })
-            // const histories = await History.find({ to: { $in: findStores?._id } })
-            const histories = await History.find(
-                {
-                    $or: [
-                        { to: { $in: findStores?._id } },
-                        { to: roleId },
-                        { from: roleId }
-                    ]
-                })
-                .sort({ timestamp: -1 })  // Sort by the 'timestamp' field in descending order
+            const storeIds = await Store.find({ userId: req.params.roleId }).select('_id').lean().exec();
+            const objectIdStoreIds = storeIds.map(store => store._id);
+
+            const notifications = await Notification.find({
+                $or: [
+                    { to: { $in: objectIdStoreIds } },
+                    { to: req.params.roleId },
+                    { from: req.params.roleId }
+                ]
+            })
+                .sort({ timestamp: -1 })
                 .exec();
-            res.status(200).send(histories)
+
+            res.status(200).send(notifications);
+
         }
     } catch (error) {
         res.status(500).json({
@@ -75,7 +77,7 @@ const getHistoryByStoreId = async (req, res) => {
 
 
 module.exports = {
-    createHistory,
-    getHistoryByUserId,
-    getHistoryByStoreId
+    createNotification,
+    getNotificationByUserId,
+    getNotificationByStoreId
 }

@@ -1,6 +1,6 @@
 const { mongoose } = require("mongoose");
 
-const historySchema = new mongoose.Schema(
+const notificationSchema = new mongoose.Schema(
     {
         activityId: {
             type: String,
@@ -33,6 +33,6 @@ const historySchema = new mongoose.Schema(
     }
 );
 
-const History = mongoose.model('History', historySchema);
+const Notification = mongoose.model('Notification', notificationSchema);
 
-module.exports = History;
+module.exports = Notification;
