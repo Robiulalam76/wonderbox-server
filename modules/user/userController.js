@@ -1,6 +1,7 @@
 const User = require("./UserModel");
 const bcrypt = require('bcryptjs');
 const { signInToken } = require("../../config/auth");
+const History = require("../history/HistoryModel");
 
 const registerUser = async (req, res) => {
     const {
@@ -30,16 +31,31 @@ const registerUser = async (req, res) => {
                 role,
                 password: bcrypt.hashSync(password),
             });
-            newUser.save();
-            const token = signInToken({ name, email, password: bcrypt.hashSync(password) });
-            res.send({
-                success: true,
-                token: token,
-                _id: newUser._id,
-                name: newUser.name,
-                email: newUser.email,
-                message: "Please Login Now!",
-            });
+            newUser.save()
+                .then(async savedUser => {
+                    const newHistory = new History({
+                        activityId: savedUser._id,
+                        title: "New Account Create Successfull!",
+                        type: "new_user",
+                        to: savedUser?._id
+                    })
+                    await newHistory.save()
+                    const token = signInToken({ name, email, password: bcrypt.hashSync(password) });
+                    res.send({
+                        success: true,
+                        token: token,
+                        _id: newUser._id,
+                        name: newUser.name,
+                        email: newUser.email,
+                        message: "Please Login Now!",
+                    });
+                })
+                .catch(err => {
+                    res.status(500).json({
+                        status: "error",
+                        message: err.message
+                    });
+                });
         }
 
     } catch (error) {
@@ -132,7 +148,6 @@ const signupWithSocial = async (req, res) => {
             });
         }
         else {
-
             const newUser = {
                 email: req.body.email,
                 name: req.body.name && req.body.name,
@@ -140,17 +155,28 @@ const signupWithSocial = async (req, res) => {
                 createWith: req.body.createWith,
                 verified: req.body.verified
             }
-            console.log(newUser);
             const result = await User.create(newUser)
-
-            if (result) {
-                const token = signInToken(result);
-                res.status(200).json({
-                    token,
-                    success: true,
-                    message: "Data insert successfully",
+                .then(async savedUser => {
+                    const newHistory = new History({
+                        activityId: savedUser._id,
+                        title: "New Account Create Successfull!",
+                        type: "new_user",
+                        to: savedUser?._id
+                    })
+                    await newHistory.save()
+                    const token = signInToken(result);
+                    res.status(200).json({
+                        token,
+                        success: true,
+                        message: "Data insert successfully",
+                    });
+                })
+                .catch(err => {
+                    res.status(500).json({
+                        status: "error",
+                        message: err.message
+                    });
                 });
-            }
         }
 
     } catch (error) {

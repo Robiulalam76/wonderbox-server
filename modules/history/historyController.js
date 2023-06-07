@@ -8,6 +8,7 @@ const createHistory = async (req, res) => {
             activityId: req.body.activityId,
             title: req.body.title,
             type: req.body.type,
+            from: req.body.from,
             to: req.body.to
         })
         await newHistory.save()
@@ -27,24 +28,24 @@ const createHistory = async (req, res) => {
 // get all history by user id
 const getHistoryByUserId = async (req, res) => {
     try {
-        const histories = await History.find({ to: req.params.userId }).sort({ _id: -1 })
-        res.status(200).send(histories)
+        const { userId } = req.params;
+        const histories = await History.find({ $or: [{ to: userId }, { from: userId }] }).sort({ _id: -1 });
+        res.status(200).send(histories);
     } catch (error) {
         res.status(500).json({
             status: "error",
-            message: error.message
-        })
+            message: error.message,
+        });
     }
-}
+};
 
 // get all history by store id
 const getHistoryByStoreId = async (req, res) => {
     try {
-        const findUser = await User.findOne({ _id: roleId })
+        const findUser = await User.findOne({ _id: req.params.roleId })
 
         if (findUser?.role === "admin") {
-            const findStores = await Store.find({})
-            const histories = await History.find({ to: { $in: findStores?._id } })
+            const histories = await History.find({})
                 .sort({ timestamp: -1 })  // Sort by the 'timestamp' field in descending order
                 .exec();
             res.status(200).send(histories)

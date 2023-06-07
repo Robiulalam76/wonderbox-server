@@ -1,14 +1,44 @@
+const History = require("../history/HistoryModel");
 const Review = require("./ReviewModel");
 
 
 // Create a new review
 const createReview = async (req, res) => {
     try {
-        const newReview = new Review(req.body);
-        const review = await newReview.save()
-        res.status(201).json(review);
+        const newReview = new Review({
+            reviewerId: req.body.reviewerId,
+            productId: req.body.productId,
+            rating: req.body.rating,
+            isPositive: req.body.isPositive,
+            title: req.body.title,
+            comment: req.body.comment,
+        });
+        newReview.save()
+            .then(async savedReview => {
+                const newHistory = new History({
+                    activityId: savedReview._id,
+                    title: "New Product Review Submitted",
+                    type: "review",
+                    from: req.body.reviewerId,
+                    to: req.body.storeId
+                })
+                await newHistory.save()
+                res.status(200).json({
+                    status: "success",
+                    message: "New Review Add Success"
+                });
+            })
+            .catch(err => {
+                res.status(500).json({
+                    status: "error",
+                    message: err.message
+                });
+            });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to create review' });
+        res.status(500).json({
+            status: "error",
+            message: error.message
+        });
     }
 };
 

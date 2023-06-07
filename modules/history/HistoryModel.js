@@ -12,8 +12,12 @@ const historySchema = new mongoose.Schema(
         },
         type: {
             type: String,
-            enum: ["new-user", "order", "review"],
+            enum: ["new_user", "new_order", "order_status", "review"],
             required: true
+        },
+        from: {
+            type: String,
+            required: false
         },
         to: {
             type: String,
