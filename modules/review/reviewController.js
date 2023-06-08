@@ -1,3 +1,4 @@
+const { saveHistory } = require("../../commons/services/saveHistory");
 const Notification = require("../notification/NotificationModel");
 const Review = require("./ReviewModel");
 
@@ -22,11 +23,16 @@ const createReview = async (req, res) => {
                     from: req.body.reviewerId,
                     to: req.body.storeId
                 })
-                await newNotification.save()
-                res.status(200).json({
-                    status: "success",
-                    message: "New Review Add Success"
-                });
+                newNotification.save()
+                    .then(async savedNotify => {
+                        const title = `New Review - Product: ${req.body.productId.slice(0, 8)}`
+                        const message = "Thank you for submitting a review for the product. Your feedback is greatly appreciated."
+                        const result = await saveHistory(savedReview._id, title, message, "review", req.body.reviewerId)
+                        res.status(200).json({
+                            status: "success",
+                            message: "New Review Add Success"
+                        });
+                    })
             })
             .catch(err => {
                 res.status(500).json({
@@ -88,7 +94,7 @@ const updateReview = async (req, res) => {
     const { title, comment, rating, isPositive } = req.body;
 
     try {
-        const updatedReview = await Review.findByIdAndUpdate(
+        await Review.findByIdAndUpdate(
             reviewId,
             {
                 title,
@@ -97,9 +103,18 @@ const updateReview = async (req, res) => {
                 isPositive,
             },
             { new: true }
-        );
+        )
+            .then(async savedReview => {
+                const title = `Update Review - Product: ${savedReview.productId.slice(0, 8)}`
+                const message = "Thank you for updating a review for the product."
+                const result = await saveHistory(savedReview._id, title, message, "review", savedReview?.reviewerId)
+                // console.log(result);
+                res.status(200).json({
+                    status: "suceess",
+                    message: "Review Update Success"
+                });
+            })
 
-        res.json(updatedReview);
     } catch (error) {
         console.log('Error updating review:', error);
         res.status(500).json({ error: 'An error occurred while updating the review' });
@@ -109,10 +124,14 @@ const updateReview = async (req, res) => {
 // Delete a review
 const deleteReview = async (req, res) => {
     const { reviewId } = req.params;
-
     try {
-        await Review.findByIdAndDelete(reviewId);
-        res.json({ message: 'Review deleted successfully' });
+        await Review.findByIdAndDelete(reviewId)
+            .then(async savedReview => {
+                const title = `Your Review has been deleted - Product id: ${savedReview.productId.slice(0, 8)}`
+                const message = "Thank you for a review for the product."
+                const result = await saveHistory(savedReview._id, title, message, "review", savedReview?.reviewerId)
+                res.json({ message: 'Review deleted successfully' });
+            })
     } catch (error) {
         console.log('Error deleting review:', error);
         res.status(500).json({ error: 'An error occurred while deleting the review' });
