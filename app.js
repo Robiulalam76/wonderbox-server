@@ -21,6 +21,7 @@ const notificationRoutes = require("./modules/notification/notificationRoutes");
 const historyRoutes = require("./modules/history/historyRoutes");
 const wishlistRoute = require("./modules/wishlist/wishlistRoute");
 const addCartRoute = require("./modules/addCart/addCartRoute");
+const categoryRoute = require("./modules/category/categoryRoute");
 
 // api routes
 app.use("/api/user", userRoutes);
@@ -34,6 +35,7 @@ app.use("/api/notification", notificationRoutes);
 app.use("/api/history", historyRoutes);
 app.use("/api/wishlist", wishlistRoute);
 app.use("/api/addcart", addCartRoute);
+app.use("/api/category", categoryRoute);
 
 app.use((err, req, res, next) => {
   if (res.headersSent) return next(err);
