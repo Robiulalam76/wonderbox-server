@@ -16,7 +16,7 @@ const historySchema = new mongoose.Schema(
         },
         type: {
             type: String,
-            enum: ["order", "user", "store", "review"],
+            enum: ["product", "order", "user", "store", "review"],
             required: true
         },
         roleId: {

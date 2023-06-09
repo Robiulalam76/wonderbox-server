@@ -2,6 +2,7 @@ const User = require("./UserModel");
 const bcrypt = require('bcryptjs');
 const { signInToken } = require("../../config/auth");
 const Notification = require("../notification/NotificationModel");
+const { saveHistory } = require("../../commons/services/saveHistory");
 
 const registerUser = async (req, res) => {
     const {
@@ -33,13 +34,16 @@ const registerUser = async (req, res) => {
             });
             newUser.save()
                 .then(async savedUser => {
-                    const newHistory = new Notification({
+                    const title = `New User Create - User name: ${name}`
+                    const message = 'Congratulations! You have successfully created a new Account.'
+                    await saveHistory(savedUser._id, title, message, "user", savedUser?._id)
+                    const newNotification = new Notification({
                         activityId: savedUser._id,
                         title: "New Account Create Successfull!",
                         type: "new_user",
                         to: savedUser?._id
                     })
-                    await newHistory.save()
+                    await newNotification.save()
                     const token = signInToken({ name, email, password: bcrypt.hashSync(password) });
                     res.send({
                         success: true,
@@ -72,7 +76,6 @@ const registerUser = async (req, res) => {
 
 // user login with email and Password
 const loginUser = async (req, res) => {
-    console.log(req.body.email);
     try {
         const { email, password } = req.body;
         if (!email || !password) {
@@ -156,15 +159,17 @@ const signupWithSocial = async (req, res) => {
             })
             newUser.save()
                 .then(async savedUser => {
-                    const newHistory = new Notification({
+                    const title = `New User Create - User name: ${savedUser?.name}`
+                    const message = 'Congratulations! You have successfully created a new Account.'
+                    await saveHistory(savedUser._id, title, message, "user", savedUser?._id)
+                    const newNotify = new Notification({
                         activityId: savedUser._id,
                         title: "New Account Create Successfull!",
                         type: "new_user",
                         to: savedUser?._id
                     })
-                    await newHistory.save()
+                    await newNotify.save()
                     const token = signInToken(savedUser);
-                    console.log(token);
                     res.status(200).json({
                         token,
                         success: true,
@@ -212,6 +217,7 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {
     try {
+        const { id } = req.params
         const user = await User.findById(req.params.id);
         if (user) {
             user.name = req.body.name;
@@ -219,17 +225,24 @@ const updateUser = async (req, res) => {
             user.address = req.body.address;
             user.phone = req.body.phone;
             user.image = req.body.image;
-            const updatedUser = await user.save();
-            const token = signInToken(updatedUser);
-            res.send({
-                token,
-                _id: updatedUser._id,
-                name: updatedUser.name,
-                email: updatedUser.email,
-                address: updatedUser.address,
-                phone: updatedUser.phone,
-                image: updatedUser.image,
-            });
+            await user.save()
+                .then(async savedUser => {
+                    const title = `User Informations Update  - User id: ${id.slice(0, 8)}`
+                    const message = 'Congratulations! You have successfully updated your Account.'
+                    await saveHistory(id, title, message, "user", id)
+
+                    const token = signInToken(savedUser);
+                    res.send({
+                        token,
+                        _id: savedUser._id,
+                        name: savedUser.name,
+                        email: savedUser.email,
+                        address: savedUser.address,
+                        phone: savedUser.phone,
+                        image: savedUser.image,
+                    });
+                })
+
         }
     } catch (err) {
         res.status(404).send({
@@ -259,18 +272,22 @@ const patchUserInfoById = async (req, res) => {
         const user = await User.findById({ _id: id });
 
         if (user) {
-            console.log(req.body, id);
-            const result = await User.updateOne(
+            await User.updateOne(
                 { _id: id },
                 { $set: patchData },
                 { runValidators: true }
-            );
-            res.status(200).json({
-                update: true,
-                status: "success",
-                message: "Update successfully",
-                data: result,
-            });
+            )
+                .then(async savedUser => {
+                    const title = `User Informations Update  - User id: ${id?.slice(0, 8)}`
+                    const message = 'Congratulations! You have successfully updated your Account.'
+                    await saveHistory(id, title, message, "user", id)
+                    res.status(200).json({
+                        update: true,
+                        status: "success",
+                        message: "Update successfully"
+                    });
+                })
+
         }
 
     } catch (error) {
@@ -287,10 +304,16 @@ const deleteUser = async (req, res) => {
         const { adminId } = req.params
         const isAdmin = await User.findById({ _id: adminId })
         if (isAdmin?.role === 'admin') {
-            const result = await User.deleteOne({ _id: req.params.userId })
-            res.status(200).send({
-                message: "User Delete Successfully!",
-            });
+            await User.deleteOne({ _id: req.params.userId })
+                .then(async savedUser => {
+                    const title = `User Delete - User name: ${savedUser?.name}`
+                    const message = 'Account Deleted Successfull!.'
+                    await saveHistory(req.params.userId, title, message, "user", isAdmin?._id)
+                    res.status(200).send({
+                        message: "User Delete Successfully!",
+                    });
+                })
+
         }
 
     } catch (error) {

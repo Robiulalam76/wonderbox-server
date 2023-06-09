@@ -1,10 +1,10 @@
+const { saveHistory } = require("../../commons/services/saveHistory");
 const User = require("../user/UserModel");
 const Store = require("./storeModel");
 
 
 const addStore = async (req, res) => {
   try {
-    console.log(req.body);
     const store = new Store({
       name: req.body.name,
       logo: req.body.logo,
@@ -18,8 +18,13 @@ const addStore = async (req, res) => {
       email: req.body.email,
       description: req.body.description
     });
-    const createdStore = await store.save();
-    res.status(201).json(createdStore);
+    await store.save()
+      .then(async savedStore => {
+        const title = `New Store Create - store id: ${savedStore?._id.slice(0, 8)}`
+        const message = "Congratulations! You have successfully create a new store."
+        await saveHistory(savedStore?._id, title, message, "store", savedStore?._id)
+        res.status(200).json(createdStore);
+      })
 
   } catch (error) {
     res.status(500).json({
@@ -85,8 +90,13 @@ const addStoreBySeller = async (req, res) => {
         email: req.body.email,
         description: req.body.description
       });
-      const createdStore = await store.save();
-      res.status(201).json(createdStore);
+      await store.save()
+        .then(async savedStore => {
+          const title = `New Store Create - store id: ${savedStore?._id.slice(0, 8)}`
+          const message = "Congratulations! You have successfully create a new store."
+          await saveHistory(savedStore?._id, title, message, "store", savedStore?._id)
+          res.status(200).json(createdStore);
+        })
     }
     else {
       res.status(500).json({
@@ -104,10 +114,15 @@ const addStoreBySeller = async (req, res) => {
 
 
 const deleteSingleStore = async (req, res) => {
-  await Store.deleteOne({ _id: req.params.id });
-  res.send({
-    message: "Store Delete Succefully",
-  });
+  await Store.deleteOne({ _id: req.params.id })
+    .then(async deleteStore => {
+      const title = `Store Delete Successfull - store id: ${req.params.id.slice(0, 8)}`
+      const message = "Congratulations! You have successfully create a new store."
+      await saveHistory(req.params.id, title, message, "store", req.params.id)
+      res.send({
+        message: "Store Delete Succefully",
+      });
+    })
 };
 
 
@@ -126,17 +141,22 @@ const getVerifiedStores = async (req, res) => {
 const updateStoreByStoreId = async (req, res) => {
   try {
     const { storeId } = req.params;
-    console.log(storeId);
     const result = await Store.updateOne(
       { _id: storeId },
       { $set: req.body },
       { runValidators: true }
-    );
-    res.status(200).json({
-      status: "success",
-      message: "Update successfully",
-      data: result,
-    });
+    )
+      .then(async savedStore => {
+        const title = `Store Info Update Successfull - store id: ${storeId.slice(0, 8)}`
+        const message = "Congratulations! You have successfully updated info."
+        await saveHistory(storeId, title, message, "store", storeId)
+        res.status(200).json({
+          status: "success",
+          message: "Update successfully",
+          data: result,
+        });
+      })
+
   } catch (error) {
     res.status(400).json({
       status: "error",
@@ -161,16 +181,21 @@ const updateUsername = async (req, res) => {
         });
       }
       else {
-        const result = await Store.updateOne(
+        await Store.updateOne(
           { _id: storeId },
           { $set: req.body },
           { runValidators: true }
-        );
-        return res.status(200).json({
-          status: "success",
-          message: "username Update successfully",
-          data: result,
-        });
+        )
+          .then(async savedStore => {
+            const title = `Store Username Update Successfull - store id: ${storeId.slice(0, 8)}`
+            const message = "Congratulations! You have successfully store new username updated."
+            await saveHistory(storeId, title, message, "store", storeId)
+            res.status(200).json({
+              status: "success",
+              message: "username Update successfully",
+              data: result,
+            });
+          })
       }
     }
     else {
@@ -218,20 +243,6 @@ const getAllStoresByRole = async (req, res) => {
     });
   }
 }
-
-
-
-// get all orders by store id
-// const getOdersByStoreId = async (req, res) => {
-//   try {
-// const orders = await 
-//   } catch (error) {
-//     res.status(500).send({
-//       message: error.message,
-//     });
-//   }
-// }
-
 
 
 module.exports = {

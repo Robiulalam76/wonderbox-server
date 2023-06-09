@@ -1,4 +1,5 @@
 
+const { saveHistory } = require("../../commons/services/saveHistory");
 const Notification = require("../notification/NotificationModel");
 const StoreCard = require("../storeCard/StoreCardModel");
 const Card = require("./CardModel");
@@ -8,6 +9,10 @@ const createCard = async (req, res) => {
         const newCard = new Card(req.body);
         newCard.save()
             .then(async savedCard => {
+                const title = `New Card Order - Product id: ${savedCard.productId.slice(0, 8)}`
+                const message = 'Congratulations! You have successfully placed a new order. We will process your order and provide updates soon.'
+                await saveHistory(savedCard._id, title, message, "order", savedCard?.userId
+                )
                 const newNotification = new Notification({
                     activityId: savedCard._id,
                     title: "New Order Received: Order",
@@ -20,6 +25,7 @@ const createCard = async (req, res) => {
                     status: "success",
                     message: "New Card Add Success"
                 });
+
             })
             .catch(err => {
                 res.status(500).json({
@@ -41,8 +47,18 @@ const createCard = async (req, res) => {
 const createCardAfterVerify = async (req, res) => {
     try {
         const newCard = new Card(req.body);
-        newCard.save()
+        await newCard.save()
             .then(async savedCard => {
+                const title = `New Card Order - Product id: ${savedCard.productId.slice(0, 8)}`
+                const message = 'Congratulations! You have successfully placed a new order. We will process your order and provide updates soon.'
+                const result = await saveHistory(savedCard._id, title, message, "order", savedCard?.userId
+                )
+                const updateStatus = await StoreCard.findByIdAndUpdate(
+                    req.body.cardId,
+                    { $set: { active: true } },
+                    { new: true }
+                );
+
                 const newNotification = new Notification({
                     activityId: savedCard._id,
                     title: "New Card Redeem: Order",
@@ -51,11 +67,6 @@ const createCardAfterVerify = async (req, res) => {
                     to: req.body.storeId
                 })
                 await newNotification.save()
-                const updateStatus = await StoreCard.findByIdAndUpdate(
-                    req.body.cardId,
-                    { $set: { active: true } },
-                    { new: true }
-                );
                 res.status(200).json(updateStatus);
             })
             .catch(err => {
@@ -81,7 +92,7 @@ const getCardByUserId = async (req, res) => {
                 { userId: req.params.userId },
                 { type: req.params?.type },
             ]
-        })
+        }).sort({ _id: -1 })
         res.status(201).json({
             status: "success",
             data: result

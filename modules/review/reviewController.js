@@ -107,8 +107,7 @@ const updateReview = async (req, res) => {
             .then(async savedReview => {
                 const title = `Update Review - Product: ${savedReview.productId.slice(0, 8)}`
                 const message = "Thank you for updating a review for the product."
-                const result = await saveHistory(savedReview._id, title, message, "review", savedReview?.reviewerId)
-                // console.log(result);
+                await saveHistory(savedReview._id, title, message, "review", savedReview?.reviewerId)
                 res.status(200).json({
                     status: "suceess",
                     message: "Review Update Success"

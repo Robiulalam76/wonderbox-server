@@ -1,3 +1,4 @@
+const { saveHistory } = require("../../commons/services/saveHistory");
 const Review = require("../review/ReviewModel");
 const Product = require("./ProductModel");
 const { getTopRankingProductsByStoreId, getProductsByStoreIdWithRating } = require("./productServices");
@@ -19,13 +20,17 @@ const createProduct = async (req, res) => {
             description: req.body.description,
             type: req.body.type,
         })
-        console.log(req.body);
-        const result = await newProduct.save()
-        res.status(400).json({
-            status: "success",
-            message: "Product Added Successfull",
-            data: result
-        });
+        await newProduct.save()
+            .then(async savedProduct => {
+                const title = `New Product Published - Product id: ${savedProduct._id.slice(0, 8)}`
+                const message = 'Congratulations! You have successfully Published a new Product.'
+                await saveHistory(savedProduct._id, title, message, "product", savedProduct?.storeId)
+                res.status(400).json({
+                    status: "success",
+                    message: "Product Added Successfull",
+                });
+            })
+
     } catch (error) {
         res.status(400).json({
             status: "error",
@@ -53,8 +58,6 @@ const allProducts = async (req, res) => {
 
 const getShowingProducts = async (req, res) => {
     try {
-        // const products = await Product.find({ status: "Show", active: "true" }).sort({ _id: -1 });
-
         const products = await Product.find({ status: "Show" }).sort({ _id: -1 });
         const productIds = products.map((product) => product._id);
 
@@ -87,13 +90,13 @@ const getShowingProducts = async (req, res) => {
     }
 };
 
+
+// get discount products
 const getDiscountedProducts = async (req, res) => {
     try {
         const products = await Product.find({ discount: { $gt: 5 } }).sort({
             _id: -1,
         });
-
-        console.log("prod", products);
         res.send(products);
     } catch (err) {
         res.status(500).send({
@@ -102,6 +105,8 @@ const getDiscountedProducts = async (req, res) => {
     }
 };
 
+
+// get all products
 const getAllProducts = async (req, res) => {
     try {
         const products = await Product.find({}).sort({ _id: -1 });
@@ -128,6 +133,7 @@ const getStockOutProducts = async (req, res) => {
         });
     }
 };
+
 
 const getProductBySlug = async (req, res) => {
     try {
@@ -241,24 +247,31 @@ const getLatestProductByStore = async (req, res) => {
 const updateProductById = async (req, res) => {
     try {
         const { productId } = req.params;
-        const result = await Product.updateOne(
-            { _id: productId },
+        await Product.findByIdAndUpdate(
+            productId,
             { $set: req.body },
-            { runValidators: true }
-        );
-        res.status(200).json({
-            status: "success",
-            message: "Update successfully",
-            data: result,
-        });
+            { runValidators: true, new: true }
+        )
+            .then(async savedProduct => {
+                const title = `Product Update - Product id: ${productId.slice(0, 8)}`;
+                const message = 'Congratulations! Your Product was successfully updated.';
+                await saveHistory(productId, title, message, "product", savedProduct.storeId);
+
+                res.status(200).json({
+                    status: "success",
+                    message: "Update successful",
+                });
+            })
+
     } catch (error) {
         res.status(400).json({
             status: "error",
-            message: "upadate couldn't success",
+            message: "Update couldn't be completed",
             error: error.message,
         });
     }
 }
+
 
 
 const updateProduct = async (req, res) => {
@@ -282,49 +295,8 @@ const updateProduct = async (req, res) => {
             await product.save();
             res.send({ data: product, message: "Product updated successfully!" });
         }
-        // handleProductStock(product);
     } catch (err) {
         res.status(404).send(err.message);
-    }
-};
-
-const createProductReview = async (req, res) => {
-    const { rating, comment } = req.body;
-
-    const product = await Product.findById(req.params.id);
-
-    if (product) {
-        const alreadyReviewed = product.reviews.find(
-            (r) => r.user.toString() === req.user._id.toString()
-        );
-
-        if (alreadyReviewed) {
-            res.status(400);
-            throw new Error("Product already reviewed");
-        }
-
-        const review = {
-            name: req.user.name,
-            rating: Number(rating),
-            comment,
-            user: req.user._id,
-        };
-
-        product.reviews.push(review);
-        product.numReviews = product.reviews.length;
-        product.rating =
-            product.reviews.reduce((acc, item) => item.rating + acc, 0) /
-            product.reviews.length;
-
-        await product.save();
-
-        res.status(201).json({
-            message: "Review Added",
-        });
-    }
-    else {
-        res.status(404);
-        throw new Error("Product not found");
     }
 };
 
@@ -336,7 +308,7 @@ const updateStatus = async (req, res) => {
 
         const findProduct = await Product.findById({ _id: req.params.id })
         if (findProduct) {
-            const result = await Product.updateOne(
+            await Product.updateOne(
                 { _id: req.params.id },
                 {
                     $set: {
@@ -344,9 +316,15 @@ const updateStatus = async (req, res) => {
                     },
                 },
             )
-            res.status(200).send({
-                message: `Product ${newStatus} Successfully!`,
-            });
+                .then(async savedProduct => {
+                    const title = `Product status Update - Product id: ${savedProduct._id.slice(0, 8)}`
+                    const message = 'Congratulations! Your Product status successfully Updated.'
+                    await saveHistory(savedProduct._id, title, message, "product", savedProduct?.storeId)
+                    res.status(200).send({
+                        message: `Product ${newStatus} Successfully!`,
+                    });
+                })
+
         }
         else {
             res.status(500).send({
@@ -364,16 +342,19 @@ const updateStatus = async (req, res) => {
 };
 
 const deleteProduct = async (req, res) => {
-    // console.log(req.params.id);
-
     try {
         const findProduct = await Product.findById({ _id: req.params.id })
         if (findProduct) {
-            const result = await Product.deleteOne({ _id: req.params.id })
-            res.status(200).send({
-                message: "Product Deleted Successfully!",
-                status: 200,
-            });
+            await Product.deleteOne({ _id: req.params.id })
+                .then(async savedProduct => {
+                    const title = `Product status Update - Product id: ${savedProduct._id.slice(0, 8)}`
+                    const message = 'Congratulations! Your Product status successfully Updated.'
+                    await saveHistory(savedProduct._id, title, message, "product", savedProduct?.storeId)
+                    res.status(200).send({
+                        message: "Product Deleted Successfully!",
+                        status: 200,
+                    });
+                })
         }
         else {
             res.status(500).send({
@@ -446,19 +427,6 @@ const getAllProductsByRole = async (req, res) => {
         });
     }
 };
-
-// handle function call to updated property
-// async function addProperty() {
-//     try {
-//         const result = await Store.updateMany({}, { userId: "640c586a9d959d1d04ea94b5" });
-//         console.log(`${result.nModified} products updated`);
-//     } catch (error) {
-//         console.error(error);
-//     } finally {
-//         // close the database connection
-//         await mongoose.connection.close();
-//     }
-// }
 
 
 module.exports = {

@@ -3,8 +3,14 @@ const StoreCard = require("./StoreCardModel");
 const createStoreCard = async (req, res) => {
     try {
         const newCard = new StoreCard(req.body);
-        const result = await newCard.save();
-        res.status(201).json(result);
+        await newCard.save()
+            .then(async savedCard => {
+                const title = `New Card Order - Product id: ${savedCard.productId.slice(0, 8)}`
+                const message = 'Congratulations! You have successfully placed a new order. We will process your order and provide updates soon.'
+                await saveHistory(savedCard._id, title, message, "order", savedCard?.userId)
+                res.status(201).json({ message: "new card added successfull" });
+            })
+
     } catch (error) {
         res.status(500).json({
             status: "error",
