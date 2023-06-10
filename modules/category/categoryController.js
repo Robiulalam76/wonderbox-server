@@ -6,13 +6,18 @@ const Category = require("./CategoryModel");
 // get all products by role
 const getAllCategoriesByRole = async (req, res) => {
   try {
-    const { _id } = req.user;
-    const isSeller = await User.findById({ _id: _id });
+    const { roleId } = req.params;
+    const isSeller = await User.findById({ _id: roleId });
     if (isSeller && isSeller?.role === "admin") {
-      const categories = await Category.find({}).sort({ _id: -1 });
+      const categories = await Category.find({ approved: true }).sort({
+        _id: -1,
+      });
       res.send(categories);
     } else if (isSeller && isSeller?.role === "seller") {
-      const categories = await Category.find({ approved: "true" }).sort({
+      const categories = await Category.find({
+        approved: true,
+        status: "Show",
+      }).sort({
         _id: -1,
       });
       res.send(categories);
@@ -35,10 +40,9 @@ const addCategory = async (req, res) => {
     const admin = await User.findOne({ _id: req.params.id });
     const newCategory = new Category(req.body);
     if (admin?.role === "admin") {
-      newCategory.approved = "true";
+      newCategory.approved = true;
       newCategory.status = "Show";
     }
-
     await newCategory.save();
     res.status(200).send({
       message: "Category Added Successfully!",
@@ -65,6 +69,28 @@ const addAllCategory = async (req, res) => {
   }
 };
 
+// get request category by admin
+const getRequestCategoryByStoreId = async (req, res) => {
+  try {
+    const { storeId } = req.params;
+    const categories = await Category.find({
+      $or: [
+        { $and: [{ approved: false }, { store: storeId }] },
+        { store: storeId },
+      ],
+    })
+      .populate("store")
+      .sort({
+        _id: -1,
+      });
+    res.status(200).send(categories);
+  } catch (err) {
+    res.status(500).send({
+      message: err.message,
+    });
+  }
+};
+
 const getShowingCategory = async (req, res) => {
   try {
     const categories = await Category.find({ status: "Show" }).sort({
@@ -80,7 +106,9 @@ const getShowingCategory = async (req, res) => {
 
 const getAllCategory = async (req, res) => {
   try {
-    const categories = await Category.find({}).sort({ _id: -1 });
+    const categories = await Category.find({ approved: true }).sort({
+      _id: -1,
+    });
     res.send(categories);
   } catch (err) {
     res.status(500).send({
@@ -142,16 +170,15 @@ const updateCategory = async (req, res) => {
 };
 
 const updateStatus = async (req, res) => {
-  const newStatus = req.body.status;
+  const newStatus = req.body;
+  console.log({ newStatus });
   try {
     const findCategory = await Category.findById({ _id: req.params.id });
     if (findCategory) {
       const result = await Category.updateOne(
         { _id: req.params.id },
         {
-          $set: {
-            status: newStatus,
-          },
+          $set: newStatus,
         }
       );
       res.status(200).send({
@@ -169,6 +196,39 @@ const updateStatus = async (req, res) => {
   }
 };
 
+// get verified stores
+const getVerifiedStores = async (req, res) => {
+  const store = await Store.find({ verified: true }).limit(8);
+  if (!store) {
+    res.status(200);
+    throw new Error("Order list is empty..");
+  }
+  res.json(store);
+};
+
+// update category info
+const updateCategoryInfo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await Category.updateOne(
+      { _id: id },
+      { $set: req.body },
+      { runValidators: true }
+    );
+    res.status(200).json({
+      status: "success",
+      message: "Update successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "error",
+      message: "upadate couldn't success",
+      error: error.message,
+    });
+  }
+};
+
 const deleteSubCategory = async (req, res) => {
   const id = req.params.id;
 
@@ -177,20 +237,19 @@ const deleteSubCategory = async (req, res) => {
   } catch (error) {}
 };
 
-const deleteCategory = (req, res) => {
-  Category.deleteOne({ _id: req.params.id }, (err) => {
-    if (err) {
-      res.status(500).send({
-        message: err.message,
-        status: 500,
-      });
-    } else {
-      res.status(200).send({
-        message: "Category Deleted Successfully!",
-        status: 200,
-      });
-    }
-  });
+const deleteCategory = async (req, res) => {
+  try {
+    await Category.deleteOne({ _id: req.params.id });
+    res.status(200).send({
+      message: "Category Deleted Successfully!",
+      status: "success",
+    });
+  } catch (error) {
+    res.status(500).send({
+      message: error.message,
+      status: 500,
+    });
+  }
 };
 
 module.exports = {
@@ -198,6 +257,8 @@ module.exports = {
   addAllCategory,
   getAllCategory,
   getCategories,
+  getRequestCategoryByStoreId,
+  updateCategoryInfo,
 
   getShowingCategory,
   getCategoryById,

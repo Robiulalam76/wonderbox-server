@@ -14,6 +14,8 @@ const {
   deleteSubCategory,
   getCategories,
   getAllCategoriesByRole,
+  getRequestCategoryByStoreId,
+  updateCategoryInfo,
 } = require("./categoryController");
 
 //add a category
@@ -40,6 +42,9 @@ router.put("/:id", updateCategory);
 //show/hide a category
 router.put("/status/:id", updateStatus);
 
+//show/hide a category
+router.patch("/updateinfo/:id", updateCategoryInfo);
+
 //delete a category
 router.delete("/:id", deleteCategory);
 
@@ -47,6 +52,7 @@ router.delete("/:id", deleteCategory);
 router.put("/sub-category/:id", deleteSubCategory);
 
 // ---------------------- dashboard Routes --------------------
-router.get("/getAllCategories/byRole", isAuth, getAllCategoriesByRole);
+router.get("/getAllCategories/byRole/:roleId", getAllCategoriesByRole);
+router.get("/request/:storeId", getRequestCategoryByStoreId);
 
 module.exports = router;
