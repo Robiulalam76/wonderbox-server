@@ -6,6 +6,7 @@ const {
   getProductsByStoreIdWithRating,
   getProductsByParentChildren,
   getProductsByParentSlug,
+  findProductsByStoreId,
 } = require("./productServices");
 
 const createProduct = async (req, res) => {
@@ -192,7 +193,7 @@ const getProductById = async (req, res) => {
 // get products by store id
 const getProductsByStoreId = async (req, res) => {
   try {
-    const product = await Product.find({ storeId: req.params.id });
+    const product = await findProductsByStoreId(req.params.id);
     res.send(product);
   } catch (err) {
     res.status(500).send({
