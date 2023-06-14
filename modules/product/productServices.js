@@ -1,3 +1,4 @@
+const Card = require("../card/CardModel");
 const Review = require("../review/ReviewModel");
 const Product = require("./ProductModel");
 
@@ -137,6 +138,7 @@ const getTopRankingProductsByStoreId = async (storeId) => {
     const topRankingProductDetails = await Product.find({
       _id: { $in: productIds },
       storeId, // Filter products by storeId
+      status: "Show",
     });
 
     const productsWithRating = topRankingProductDetails.map((product) => {
@@ -157,6 +159,54 @@ const getTopRankingProductsByStoreId = async (storeId) => {
   } catch (error) {
     console.error("Error retrieving top ranking products by storeId:", error);
     throw error;
+  }
+};
+
+// get all top rankings products
+const getTopRankingProducts = async () => {
+  try {
+    const topRankingProducts = await Review.aggregate([
+      {
+        $group: {
+          _id: "$productId",
+          averageRating: { $avg: "$rating" },
+        },
+      },
+      {
+        $sort: { averageRating: -1 }, // Sort by averageRating in descending order
+      },
+      {
+        $limit: 10,
+      },
+    ]);
+    const productIds = topRankingProducts.map((product) => product._id);
+    const topRankingProductDetails = await Product.find({
+      _id: { $in: productIds },
+      status: "Show",
+    });
+
+    const productsWithRating = topRankingProductDetails.map((product) => {
+      const rating = topRankingProducts.find(
+        (rating) => rating._id.toString() === product._id.toString()
+      );
+      return {
+        ...product.toObject(),
+        rating: Math.ceil(rating ? rating.averageRating : 0), // Add average rating to each product
+      };
+    });
+
+    // console.log(productsWithRating);
+
+    const sortedProducts = productsWithRating.sort(
+      (a, b) => b.rating - a.rating
+    ); // Sort products by rating in descending order
+
+    return sortedProducts;
+  } catch (error) {
+    res.status(400).json({
+      status: "error",
+      error: error.message,
+    });
   }
 };
 
@@ -231,11 +281,75 @@ const findProductsByStoreId = async (storeId) => {
   }
 };
 
+// get popular products by storeid
+const getPopularProductsByStoreId = async (storeId) => {
+  try {
+    const popularProducts = await Card.aggregate([
+      {
+        $match: {
+          storeId: storeId,
+        },
+      },
+      {
+        $group: {
+          _id: "$productId",
+          totalOrders: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { totalOrders: -1 },
+      },
+    ]);
+    const productIds = popularProducts.map((product) => product._id);
+    const popularProductDetails = await Product.find({
+      _id: { $in: productIds },
+      storeId: storeId,
+      status: "Show",
+    });
+
+    return popularProductDetails;
+  } catch (error) {
+    console.error("Error retrieving popular products by storeId:", error);
+    throw error;
+  }
+};
+
+const getAllPopularProducts = async () => {
+  try {
+    const popularProducts = await Card.aggregate([
+      {
+        $group: {
+          _id: "$productId",
+          totalOrders: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { totalOrders: -1 }, // Sort by totalOrders in descending order
+      },
+    ]);
+
+    const productIds = popularProducts.map((product) => product._id);
+    const popularProductDetails = await Product.find({
+      _id: { $in: productIds },
+      status: "Show",
+    });
+
+    console.log(popularProductDetails);
+
+    return popularProductDetails;
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getProductsByParentChildren,
   getProductsByParentSlug,
   getProductsByStoreIdWithRating,
   getTopRankingProductsByStoreId,
+  getTopRankingProducts,
   findLatestProductByStore,
   findProductsByStoreId,
+  getPopularProductsByStoreId,
+  getAllPopularProducts,
 };

@@ -7,6 +7,9 @@ const {
   getProductsByParentChildren,
   getProductsByParentSlug,
   findProductsByStoreId,
+  getTopRankingProducts,
+  getPopularProductsByStoreId,
+  getAllPopularProducts,
 } = require("./productServices");
 
 const createProduct = async (req, res) => {
@@ -178,7 +181,6 @@ const getProductsBySlugAndChildrenSlug = async (req, res) => {
 };
 
 const getProductById = async (req, res) => {
-  console.log(req.params.id);
   try {
     const product = await Product.findById(req.params.id);
     // console.log(product);
@@ -217,7 +219,7 @@ const getShowProductsByStoreId = async (req, res) => {
 };
 
 // get top ranking products
-const topRankingProducts = async (req, res) => {
+const topRankingProductsByStore = async (req, res) => {
   try {
     const { storeId } = req.params;
     const topRankingProducts = await getTopRankingProductsByStoreId(storeId);
@@ -225,6 +227,16 @@ const topRankingProducts = async (req, res) => {
     res.json(topRankingProducts);
   } catch (error) {
     console.error("Error retrieving top ranking products:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// get top ranking products
+const topRankingProducts = async (req, res) => {
+  try {
+    const products = await getTopRankingProducts();
+    res.json(products);
+  } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -438,11 +450,38 @@ const getAllProductsByRole = async (req, res) => {
   }
 };
 
+// get populer products by store id
+const populerProductsByStoreId = async (req, res) => {
+  try {
+    const products = await getPopularProductsByStoreId(req.params.storeId);
+    res.send(products);
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
+
+// get populer products by store id
+const populerProducts = async (req, res) => {
+  try {
+    const products = await getAllPopularProducts();
+    res.send(products);
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createProduct,
   allProducts,
   getProductsByStoreId,
   getShowProductsByStoreId,
+  topRankingProductsByStore,
   topRankingProducts,
   getLatestProductByStore,
   updateProductById,
@@ -464,4 +503,6 @@ module.exports = {
 
   // ---------------dashboard ----------------
   getAllProductsByRole,
+  populerProductsByStoreId,
+  populerProducts,
 };

@@ -1,10 +1,35 @@
 const express = require("express");
 const { isAuth } = require("../../config/auth");
-const { createProduct, getProductById, getShowingProducts, getDiscountedProducts, getAllProducts, getLatestProducts, getStockOutProducts, getProductBySlug, getProductsByParent, getProductsBySlugAndChildrenSlug, getSearchProducts, updateProduct, updateStatus, deleteProduct, getAllProductsByRole, getProductsByStoreId, getShowProductsByStoreId, topRankingProducts, getLatestProductByStore, allProducts, updateProductById } = require("./productController");
+const {
+  createProduct,
+  getProductById,
+  getShowingProducts,
+  getDiscountedProducts,
+  getAllProducts,
+  getLatestProducts,
+  getStockOutProducts,
+  getProductBySlug,
+  getProductsByParent,
+  getProductsBySlugAndChildrenSlug,
+  getSearchProducts,
+  updateProduct,
+  updateStatus,
+  deleteProduct,
+  getAllProductsByRole,
+  getProductsByStoreId,
+  getShowProductsByStoreId,
+  getLatestProductByStore,
+  allProducts,
+  updateProductById,
+  topRankingProductsByStore,
+  topRankingProducts,
+  populerProductsByStoreId,
+  populerProducts,
+} = require("./productController");
 const router = express.Router();
 
 // new product
-router.post("/add", createProduct)
+router.post("/add", createProduct);
 router.get("/", allProducts);
 
 router.get("/:id", getProductById);
@@ -16,7 +41,16 @@ router.get("/store/:id", getProductsByStoreId);
 router.get("/store/show-products/:id", getShowProductsByStoreId);
 
 // top ranking products by store id
-router.get('/top-ranking-products/:storeId', topRankingProducts);
+router.get("/top-ranking-products/:storeId", topRankingProductsByStore);
+
+// top ranking products by store id
+router.get("/top-ranking/all", topRankingProducts);
+
+// get popular products by store id
+router.get("/popular/:storeId", populerProductsByStoreId);
+
+// get popular products
+router.get("/popular/products/all", populerProducts);
 
 //get all latest products
 router.get("/latest/:storeId", getLatestProductByStore);
@@ -27,14 +61,11 @@ router.get("/getProducts/latest", getLatestProducts);
 //get showing products only
 router.get("/show/all", getShowingProducts);
 
-
 //get discounted products only
 router.get("/discount/all", getDiscountedProducts);
 
 //get all products
 router.get("/", getAllProducts);
-
-
 
 //get all stock out products
 router.get("/stock-out", getStockOutProducts);
@@ -53,7 +84,6 @@ router.get("/search/:searchtitle", getSearchProducts);
 //update a product
 router.put("/:id", updateProduct);
 
-
 //update a product
 router.patch("/update/:productId", updateProductById);
 
@@ -64,6 +94,6 @@ router.put("/status/:id", updateStatus);
 router.delete("/:id", deleteProduct);
 
 // ---------------------- dashboard Routes --------------------
-router.get("/getAllProducts/byRole/:userId", getAllProductsByRole)
+router.get("/getAllProducts/byRole/:userId", getAllProductsByRole);
 
 module.exports = router;
