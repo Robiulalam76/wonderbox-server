@@ -93,7 +93,10 @@ const getRequestCategoryByStoreId = async (req, res) => {
 
 const getShowingCategory = async (req, res) => {
   try {
-    const categories = await Category.find({ status: "Show" }).sort({
+    const categories = await Category.find({
+      status: "Show",
+      approved: true,
+    }).sort({
       _id: -1,
     });
     res.send(categories);

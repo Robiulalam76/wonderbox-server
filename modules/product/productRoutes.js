@@ -1,5 +1,4 @@
 const express = require("express");
-const { isAuth } = require("../../config/auth");
 const {
   createProduct,
   getProductById,

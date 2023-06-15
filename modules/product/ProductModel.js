@@ -16,15 +16,20 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
     originalPrice: {
-      type: String,
+      type: Number,
       required: true,
     },
     price: {
-      type: String,
+      type: Number,
       required: true,
     },
     discount: {
-      type: String,
+      type: Number,
+      default: 0,
+      required: false,
+    },
+    walletDiscountAmount: {
+      type: Number,
       required: false,
     },
     features: {
@@ -56,6 +61,14 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
     longDescription: {
+      type: String,
+      required: true,
+    },
+    address: {
+      type: String,
+      required: true,
+    },
+    numberPerson: {
       type: String,
       required: true,
     },

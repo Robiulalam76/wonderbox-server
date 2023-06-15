@@ -18,22 +18,29 @@ const createProduct = async (req, res) => {
       title: req.body.title,
       images: req.body.images,
       storeId: req.body.storeId,
+      originalPrice: req.body.originalPrice,
       price: req.body.price,
       discount: req.body.discount,
-      features: req.body.features,
       parent: req.body.parent,
       parentSlug: req.body.parent.replaceAll(" ", "-").toLowerCase(),
       children: req.body.children,
       childrenSlug: req.body.children.replaceAll(" ", "-").toLowerCase(),
       titleSlug: req.body.title.replaceAll(" ", "-").toLowerCase(),
-      description: req.body.description,
+      smallDescription: req.body.smallDescription,
+      longDescription: req.body.longDescription,
+      address: req.body.address,
+      numberPerson: req.body.numberPerson,
       type: req.body.type,
     });
+
+    if (req.body.type === "Wallet") {
+      newProduct["walletDiscountAmount"] = req.body.walletDiscountAmount;
+    } else {
+      newProduct["features"] = req.body.features;
+    }
+
     await newProduct.save().then(async (savedProduct) => {
-      const title = `New Product Published - Product id: ${savedProduct._id.slice(
-        0,
-        8
-      )}`;
+      const title = `New Product Published: ${req.body.title}`;
       const message =
         "Congratulations! You have successfully Published a new Product.";
       await saveHistory(
@@ -45,13 +52,12 @@ const createProduct = async (req, res) => {
       );
       res.status(400).json({
         status: "success",
-        message: "Product Added Successfull",
+        message: "Product Added Successful",
       });
     });
   } catch (error) {
     res.status(400).json({
       status: "error",
-      message: "Data couldn't insert",
       error: error.message,
     });
   }
@@ -314,7 +320,6 @@ const updateProduct = async (req, res) => {
 
 const updateStatus = async (req, res) => {
   const newStatus = req.body.status;
-  console.log(newStatus);
 
   try {
     const findProduct = await Product.findById({ _id: req.params.id });
@@ -322,9 +327,7 @@ const updateStatus = async (req, res) => {
       await Product.updateOne(
         { _id: req.params.id },
         {
-          $set: {
-            status: newStatus,
-          },
+          $set: newStatus,
         }
       ).then(async (savedProduct) => {
         const title = `Product status Update - Product id: ${savedProduct._id.slice(
@@ -351,7 +354,7 @@ const updateStatus = async (req, res) => {
     }
   } catch (error) {
     res.status(500).send({
-      message: err.message,
+      message: error.message,
     });
   }
 };
@@ -362,18 +365,14 @@ const deleteProduct = async (req, res) => {
     if (findProduct) {
       await Product.deleteOne({ _id: req.params.id }).then(
         async (savedProduct) => {
-          const title = `Product status Update - Product id: ${savedProduct._id.slice(
-            0,
-            8
-          )}`;
-          const message =
-            "Congratulations! Your Product status successfully Updated.";
+          const title = `Product is Deleted: ${findProduct?.title}`;
+          const message = "Congratulations! Your Product Deleted successfully!";
           await saveHistory(
-            savedProduct._id,
+            findProduct._id,
             title,
             message,
             "product",
-            savedProduct?.storeId
+            findProduct?.storeId
           );
           res.status(200).send({
             message: "Product Deleted Successfully!",
@@ -414,7 +413,6 @@ const getSearchProducts = async (req, res) => {
     const mainname = i.title.toLowerCase();
     return mainname.includes(searchKey) && i;
   });
-  console.log(allSearchedProducts);
 
   if (product) {
     res.status(200).json({ total: product.length, allSearchedProducts });

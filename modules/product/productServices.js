@@ -247,7 +247,7 @@ const findLatestProductByStore = async (storeId) => {
 // get products by store with ratings
 const findProductsByStoreId = async (storeId) => {
   try {
-    const products = await Product.find({ storeId: storeId });
+    const products = await Product.find({ storeId: storeId }).sort({ _id: -1 });
     const productIds = products.map((product) => product._id);
 
     const productRatings = await Review.aggregate([
@@ -258,7 +258,7 @@ const findProductsByStoreId = async (storeId) => {
         $group: {
           _id: "$productId",
           averageRating: { $avg: "$rating" },
-          totalRatings: { $sum: 1 }, // Add the totalRatings field
+          totalRatings: { $sum: 1 },
         },
       },
     ]);
