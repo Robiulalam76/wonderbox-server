@@ -189,7 +189,6 @@ const getProductsBySlugAndChildrenSlug = async (req, res) => {
 const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    // console.log(product);
     res.send(product);
   } catch (err) {
     res.status(500).send({

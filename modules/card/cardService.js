@@ -1,3 +1,6 @@
+const {
+  checkNumberGenerate,
+} = require("../../commons/services/checkNumberGenerate");
 const { generatePrivateKey } = require("../../commons/services/keyGenerate");
 const {
   generateSerialNumber,
@@ -11,6 +14,7 @@ const createNewCardForOrder = async (data) => {
 
   const serialNumber = await generateSerialNumber();
   const privateKey = await generatePrivateKey();
+  const checkNumber = await checkNumberGenerate(12);
   const newCard = new Card({
     title: product?.title,
     productId: data?.productId,
@@ -19,7 +23,7 @@ const createNewCardForOrder = async (data) => {
     storeId: data?.storeId,
     price: data?.price,
     type: data?.type,
-    checkNumber: data?.checkNumber,
+    checkNumber: data?.checkNumber ? data?.checkNumber : checkNumber,
     serialNumber: data?.serialNumber ? data?.serialNumber : serialNumber,
     securityCode: data?.securityCode
       ? data?.securityCode
