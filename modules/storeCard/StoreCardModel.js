@@ -1,59 +1,62 @@
-const { default: mongoose } = require("mongoose");
+const { mongoose } = require("mongoose");
 
-const storeCardSchema = new mongoose.Schema({
+const storeCardSchema = new mongoose.Schema(
+  {
     title: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     productId: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     storeId: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     features: {
-        type: [String],
-        required: true
+      type: [String],
+      required: false,
     },
     amount: {
-        type: String,
-        required: false
+      type: Number,
+      required: false,
+    },
+    price: {
+      type: Number,
+      required: true,
     },
     type: {
-        type: String,
-        enum: ["Wallet", "Package"],
-        required: true
+      type: String,
+      enum: ["Wallet", "Package"],
+      required: true,
     },
-    status: {
-        type: String,
-        enum: ["Show", "Hide"],
-        default: "Show"
+    state: {
+      type: String,
+      enum: ["Disable", "Enable", "Used", "Expired"],
+      default: "Disable",
     },
-    active: {
-        type: String,
-        enum: ["true", "false"],
-        default: "false"
+    serialNumber: {
+      type: String,
+      required: true,
     },
     checkNumber: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     securityCode: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
-    priveteKey: {
-        type: String,
-        required: true
+    privateKey: {
+      type: String,
+      required: true,
     },
-},
-    {
-        timestamps: true
-    }
-)
-
+  },
+  {
+    timestamps: true,
+  }
+);
 
 const StoreCard = mongoose.model("StoreCard", storeCardSchema);
-module.exports = StoreCard
+module.exports = StoreCard;

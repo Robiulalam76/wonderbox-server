@@ -2,13 +2,14 @@ const { saveHistory } = require("../../commons/services/saveHistory");
 const Notification = require("../notification/NotificationModel");
 const StoreCard = require("../storeCard/StoreCardModel");
 const Card = require("./CardModel");
-const { getPopularProductsByStoreId } = require("./cardService");
+const {
+  getPopularProductsByStoreId,
+  createNewCardForOrder,
+} = require("./cardService");
 
 const createCard = async (req, res) => {
   try {
-    const newCard = new Card(req.body);
-    newCard
-      .save()
+    await createNewCardForOrder(req.body)
       .then(async (savedCard) => {
         const title = `New Card Order - Product id: ${savedCard.productId.slice(
           0,
@@ -53,29 +54,18 @@ const createCard = async (req, res) => {
 // create card after verify
 const createCardAfterVerify = async (req, res) => {
   try {
-    const newCard = new Card(req.body);
-    await newCard
-      .save()
+    await createNewCardForOrder(req.body)
       .then(async (savedCard) => {
-        const title = `New Card Order - Product id: ${savedCard.productId.slice(
-          0,
-          8
-        )}`;
+        const title = `New Card Order - Product id: ${req.body.title}`;
         const message =
           "Congratulations! You have successfully placed a new order. We will process your order and provide updates soon.";
-        const result = await saveHistory(
+        await saveHistory(
           savedCard._id,
           title,
           message,
           "order",
           savedCard?.userId
         );
-        const updateStatus = await StoreCard.findByIdAndUpdate(
-          req.body.cardId,
-          { $set: { active: true } },
-          { new: true }
-        );
-
         const newNotification = new Notification({
           activityId: savedCard._id,
           title: "New Card Redeem: Order",
@@ -84,7 +74,7 @@ const createCardAfterVerify = async (req, res) => {
           to: req.body.storeId,
         });
         await newNotification.save();
-        res.status(200).json(updateStatus);
+        res.status(200).json({ success: true });
       })
       .catch((err) => {
         res.status(500).json({

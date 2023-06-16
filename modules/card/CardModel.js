@@ -26,19 +26,14 @@ const cardSchema = new mongoose.Schema(
     },
     features: {
       type: [String],
-      required: true,
-    },
-    amount: {
-      type: String,
       required: false,
     },
-    active: {
-      type: String,
-      enum: ["true", "false"],
-      default: "true",
+    amount: {
+      type: Number,
+      required: false,
     },
-    priveteKey: {
-      type: String,
+    price: {
+      type: Number,
       required: true,
     },
     type: {
@@ -46,9 +41,26 @@ const cardSchema = new mongoose.Schema(
       enum: ["Wallet", "Package"],
       required: true,
     },
-    email: {
+    state: {
       type: String,
-      required: false,
+      enum: ["Enable", "Used", "Expired"],
+      default: "Enable",
+    },
+    serialNumber: {
+      type: String,
+      required: true,
+    },
+    checkNumber: {
+      type: String,
+      required: true,
+    },
+    securityCode: {
+      type: String,
+      required: true,
+    },
+    privateKey: {
+      type: String,
+      required: true,
     },
   },
   {

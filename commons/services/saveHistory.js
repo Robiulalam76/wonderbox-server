@@ -1,6 +1,5 @@
 const History = require("../../modules/history/HistoryModel");
 
-
 async function saveHistory(activityId, title, message, type, roleId) {
   try {
     const newHistory = new History({
@@ -8,7 +7,7 @@ async function saveHistory(activityId, title, message, type, roleId) {
       title,
       message,
       type,
-      roleId
+      roleId,
     });
 
     const savedHistory = await newHistory.save();
@@ -20,5 +19,5 @@ async function saveHistory(activityId, title, message, type, roleId) {
 }
 
 module.exports = {
-  saveHistory
+  saveHistory,
 };
