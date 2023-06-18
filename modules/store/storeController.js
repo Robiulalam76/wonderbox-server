@@ -9,19 +9,14 @@ const addStore = async (req, res) => {
       logo: req.body.logo,
       images: req.body.images,
       username: req.body.username?.replaceAll(" ", "").toLowerCase(),
-      userId: req.body.userId,
-      street: req.body.street,
-      city: req.body.city,
-      country: req.body.country,
-      postalCode: req.body.postalCode,
+      seller: req.body.seller,
+      address: req.body.address,
       email: req.body.email,
+      phone: req.body.phone,
       description: req.body.description,
     });
     await store.save().then(async (savedStore) => {
-      const title = `New Store Create - store id: ${savedStore?._id.slice(
-        0,
-        8
-      )}`;
+      const title = `New Store Create - store : ${req.body.name}`;
       const message =
         "Congratulations! You have successfully create a new store.";
       await saveHistory(
@@ -43,7 +38,7 @@ const addStore = async (req, res) => {
 
 const getStore = async (req, res) => {
   try {
-    const store = await Store.find({ status: "Show" }).populate("userId");
+    const store = await Store.find({ status: "Show" }).populate("seller");
     res.send(store);
   } catch (error) {
     res.status(500).json({
@@ -54,8 +49,7 @@ const getStore = async (req, res) => {
 };
 
 const getStoreById = async (req, res) => {
-  const store = await Store.findOne({ _id: req.params.id });
-  console.log(store);
+  const store = await Store.findOne({ _id: req.params.id }).populate("seller");
 
   if (store) {
     res.send(store);
@@ -86,19 +80,14 @@ const addStoreBySeller = async (req, res) => {
         logo: req.body.logo,
         images: req.body.images,
         username: req.body.username?.replaceAll(" ", "").toLowerCase(),
-        userId: req.body.userId,
-        street: req.body.street,
-        city: req.body.city,
-        country: req.body.country,
-        postalCode: req.body.postalCode,
+        seller: req.body.seller,
+        address: req.body.address,
         email: req.body.email,
+        phone: req.body.phone,
         description: req.body.description,
       });
       await store.save().then(async (savedStore) => {
-        const title = `New Store Create - store id: ${savedStore?._id.slice(
-          0,
-          8
-        )}`;
+        const title = `New Store Create - store: ${req.body.name}`;
         const message =
           "Congratulations! You have successfully create a new store.";
         await saveHistory(
@@ -233,10 +222,10 @@ const getAllStoresByRole = async (req, res) => {
     const isUser = await User.findById({ _id: userId });
 
     if (isUser?.role === "admin") {
-      const stores = await Store.find({});
+      const stores = await Store.find({}).populate("seller");
       res.send(stores);
     } else if (isUser && isUser?.role === "seller") {
-      const stores = await Store.find({ userId: userId });
+      const stores = await Store.find({ seller: userId }).populate("seller");
       res.send(stores);
     } else {
       res.status(500).send({
