@@ -8,6 +8,7 @@ const createTransaction = async (req, res) => {
       accountNo: req.body.accountNo,
       amount: req.body.amount,
       txnId: req.body.txnId,
+      images: req.body.images,
       user: req.body.user,
       type: req.body.type,
       description: req.body.description,
@@ -29,23 +30,30 @@ const createTransaction = async (req, res) => {
 const getAllTransactions = async (req, res) => {
   const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1 if not provided
   const limit = 10; // Number of transactions per page
-  const approvedFilter = req.query.approved; // Approved filter value (true, false, or undefined)
+  const approvedFilter = req.query.approved;
+  const typeFilter = req.query.type;
 
   try {
-    let conditions = {};
+    let conditions = [];
 
     if (approvedFilter !== undefined) {
       conditions.push({ approved: approvedFilter });
     }
+    if (typeFilter !== undefined) {
+      conditions.push({ type: typeFilter });
+    }
 
-    const count = await Transaction.countDocuments(conditions);
+    console.log(conditions);
+    const query = conditions.length > 0 ? { $and: conditions } : {};
+
+    const count = await Transaction.countDocuments(query);
     const totalPages = Math.ceil(count / limit);
 
-    const transactions = await Transaction.find(conditions)
-      .populate("user")
+    const transactions = await Transaction.find(query)
       .sort({ _id: -1 })
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .populate("user", "image name");
 
     res.status(200).json({
       success: true,
@@ -92,8 +100,6 @@ const getDepositByUserId = async (req, res) => {
       conditions.push({ approved: approvedFilter });
     }
 
-    console.log(conditions);
-
     const count = await Transaction.countDocuments({ $and: conditions });
     const totalPages = Math.ceil(count / limit);
 
@@ -117,9 +123,30 @@ const getDepositByUserId = async (req, res) => {
   }
 };
 
+const updateInfoById = async (req, res) => {
+  try {
+    const result = await Transaction.updateOne(
+      { _id: req.params.id },
+      req.body,
+      { new: true }
+    );
+    res.status(200).json({
+      success: true,
+      message: `${req.body.approved ? "Approved" : "Pending"} Add Successful`,
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createTransaction,
   getAllTransactions,
   getTransactionById,
   getDepositByUserId,
+  updateInfoById,
 };

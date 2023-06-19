@@ -22,6 +22,10 @@ const transactionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    images: {
+      type: [String],
+      required: true,
+    },
     user: {
       type: String,
       ref: "User",
