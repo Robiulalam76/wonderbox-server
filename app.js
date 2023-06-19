@@ -22,6 +22,7 @@ const historyRoutes = require("./modules/history/historyRoutes");
 const wishlistRoute = require("./modules/wishlist/wishlistRoute");
 const addCartRoute = require("./modules/addCart/addCartRoute");
 const categoryRoute = require("./modules/category/categoryRoute");
+const transactionRoute = require("./modules/transaction/transactionRoute");
 
 // api routes
 app.use("/api/user", userRoutes);
@@ -36,6 +37,7 @@ app.use("/api/history", historyRoutes);
 app.use("/api/wishlist", wishlistRoute);
 app.use("/api/addcart", addCartRoute);
 app.use("/api/category", categoryRoute);
+app.use("/api/transaction", transactionRoute);
 
 app.use((err, req, res, next) => {
   if (res.headersSent) return next(err);
