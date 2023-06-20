@@ -24,6 +24,8 @@ const {
   topRankingProducts,
   populerProductsByStoreId,
   populerProducts,
+  productTitles,
+  productPagination,
 } = require("./productController");
 const router = express.Router();
 
@@ -79,7 +81,7 @@ router.get("/cat/:slug", getProductsByParent);
 // search children_slug
 router.get("/cat/:slug/:children_slug", getProductsBySlugAndChildrenSlug);
 
-router.get("/search/:searchtitle", getSearchProducts);
+// router.get("/search/:searchtitle", getSearchProducts);
 //update a product
 router.put("/:id", updateProduct);
 
@@ -91,6 +93,12 @@ router.put("/status/:id", updateStatus);
 
 //delete a product
 router.delete("/:id", deleteProduct);
+
+//delete a product
+router.get("/search/title", productTitles);
+
+//delete a product
+router.get("/pagination/show", productPagination);
 
 // ---------------------- dashboard Routes --------------------
 router.get("/getAllProducts/byRole/:userId", getAllProductsByRole);

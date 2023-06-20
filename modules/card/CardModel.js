@@ -1,4 +1,4 @@
-const { mongoose } = require("mongoose");
+const { mongoose, Types } = require("mongoose");
 
 const cardSchema = new mongoose.Schema(
   {
@@ -34,6 +34,11 @@ const cardSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
+      required: true,
+    },
+    payment: {
+      type: Types.ObjectId,
+      ref: "Payment",
       required: true,
     },
     type: {

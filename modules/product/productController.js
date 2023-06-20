@@ -386,7 +386,89 @@ const deleteProduct = async (req, res) => {
     }
   } catch (error) {
     res.status(500).send({
-      message: err.message,
+      message: error.message,
+    });
+  }
+};
+
+// get all products titles
+const productTitles = async (req, res) => {
+  try {
+    const findTitle = await Product.find({
+      $and: [
+        { status: "Show" },
+        {
+          $or: [
+            {
+              title: {
+                $regex: req.query.search,
+                $options: "i",
+              },
+            },
+            {
+              parent: {
+                $regex: req.query.search,
+                $options: "i",
+              },
+            },
+          ],
+        },
+      ],
+    }).select({ title: 1 });
+    res.status(200).json({
+      success: true,
+      message: "Get Titles Successful",
+      data: findTitle,
+    });
+  } catch (error) {
+    res.status(500).send({
+      message: error.message,
+    });
+  }
+};
+
+// get all products titles
+const productPagination = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 12;
+
+    const conditions = req.query.search
+      ? {
+          $and: [
+            { status: "Show" },
+            {
+              $or: [
+                {
+                  title: {
+                    $regex: req.query.search,
+                    $options: "i",
+                  },
+                },
+                {
+                  parent: {
+                    $regex: req.query.search,
+                    $options: "i",
+                  },
+                },
+              ],
+            },
+          ],
+        }
+      : { status: "Show" };
+
+    const products = await Product.find(conditions)
+      .sort({ _id: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+    res.status(200).json({
+      success: true,
+      message: "Products get Successful",
+      data: products,
+    });
+  } catch (error) {
+    res.status(500).send({
+      message: error.message,
     });
   }
 };
@@ -502,4 +584,6 @@ module.exports = {
   getAllProductsByRole,
   populerProductsByStoreId,
   populerProducts,
+  productTitles,
+  productPagination,
 };
