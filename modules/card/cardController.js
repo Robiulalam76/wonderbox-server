@@ -94,12 +94,27 @@ const createCardAfterVerify = async (req, res) => {
 
 const getCardByUserId = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1 if not provided
+    const limit = 10; // Number of transactions per page
+
+    const count = await Card.countDocuments({
+      $and: [{ userId: req.params.userId }, { type: req.params?.type }],
+    });
+    const totalPages = Math.ceil(count / limit);
+
     const result = await Card.find({
       $and: [{ userId: req.params.userId }, { type: req.params?.type }],
-    }).sort({ _id: -1 });
+    })
+      .sort({ _id: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("payment");
+
     res.status(201).json({
       status: "success",
       data: result,
+      page,
+      totalPages,
     });
   } catch (error) {
     res.status(500).json({

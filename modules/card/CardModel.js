@@ -20,6 +20,11 @@ const cardSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    address: {
+      type: Types.ObjectId,
+      ref: "Address",
+      required: false,
+    },
     storeId: {
       type: String,
       required: true,
@@ -39,6 +44,11 @@ const cardSchema = new mongoose.Schema(
     payment: {
       type: Types.ObjectId,
       ref: "Payment",
+      required: false,
+    },
+    payType: {
+      type: String,
+      enum: ["Online", "Offline"],
       required: true,
     },
     type: {

@@ -43,7 +43,6 @@ const getAllTransactions = async (req, res) => {
       conditions.push({ type: typeFilter });
     }
 
-    console.log(conditions);
     const query = conditions.length > 0 ? { $and: conditions } : {};
 
     const count = await Transaction.countDocuments(query);

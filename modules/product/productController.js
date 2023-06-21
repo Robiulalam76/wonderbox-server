@@ -459,7 +459,7 @@ const productPagination = async (req, res) => {
 
     const products = await Product.find(conditions)
       .sort({ _id: -1 })
-      .skip((page - 1) * limit)
+      // .skip((page - 1) * limit)
       .limit(limit);
     res.status(200).json({
       success: true,
