@@ -2,31 +2,14 @@ const { mongoose, Types } = require("mongoose");
 
 const cardSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-    },
-    productId: {
-      type: String,
-      ref: "product",
-      required: true,
-    },
-    cardId: {
-      type: String,
-      required: false,
-    },
-    userId: {
-      type: String,
-      ref: "User",
-      required: true,
-    },
-    address: {
+    product: {
       type: Types.ObjectId,
-      ref: "Address",
-      required: false,
+      ref: "Product",
+      required: true,
     },
-    storeId: {
-      type: String,
+    store: {
+      type: Types.ObjectId,
+      ref: "Store",
       required: true,
     },
     features: {
@@ -41,16 +24,6 @@ const cardSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    payment: {
-      type: Types.ObjectId,
-      ref: "Payment",
-      required: false,
-    },
-    payType: {
-      type: String,
-      enum: ["Online", "Offline"],
-      required: true,
-    },
     type: {
       type: String,
       enum: ["Wallet", "Package"],
@@ -60,10 +33,6 @@ const cardSchema = new mongoose.Schema(
       type: String,
       enum: ["Enable", "Used", "Expired"],
       default: "Enable",
-    },
-    serialNumber: {
-      type: String,
-      required: true,
     },
     checkNumber: {
       type: String,

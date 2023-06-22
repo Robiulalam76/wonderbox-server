@@ -131,7 +131,7 @@ const updateInfoById = async (req, res) => {
     );
     res.status(200).json({
       success: true,
-      message: `${req.body.approved ? "Approved" : "Pending"} Add Successful`,
+      message: `Transaction Update Successful`,
       data: result,
     });
   } catch (error) {

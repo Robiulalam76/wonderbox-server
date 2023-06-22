@@ -1,5 +1,4 @@
 const Card = require("../../modules/card/CardModel");
-const StoreCard = require("../../modules/storeCard/StoreCardModel");
 
 const findLastSerialNumber = async () => {
   const lastSerialNumber = await Card.findOne({}, { serialNumber: 1, _id: 0 })

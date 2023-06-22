@@ -1,20 +1,13 @@
 const { saveHistory } = require("../../commons/services/saveHistory");
 const Notification = require("../notification/NotificationModel");
-const StoreCard = require("../storeCard/StoreCardModel");
 const Card = require("./CardModel");
-const {
-  getPopularProductsByStoreId,
-  createNewCardForOrder,
-} = require("./cardService");
+const { createNewCardForOrder } = require("./cardService");
 
 const createCard = async (req, res) => {
   try {
     await createNewCardForOrder(req.body)
       .then(async (savedCard) => {
-        const title = `New Card Order - Product id: ${savedCard.productId.slice(
-          0,
-          8
-        )}`;
+        const title = `New Card Order - Order No: ${savedCard.orderNo}`;
         const message =
           "Congratulations! You have successfully placed a new order. We will process your order and provide updates soon.";
         await saveHistory(
@@ -22,14 +15,13 @@ const createCard = async (req, res) => {
           title,
           message,
           "order",
-          savedCard?.userId
+          savedCard?.user
         );
         const newNotification = new Notification({
           activityId: savedCard._id,
           title: "New Order Received: Order",
           type: "new_order",
-          from: req.body.userId,
-          to: req.body.storeId,
+          user: savedCard?.user,
         });
         await newNotification.save();
         res.status(200).json({
@@ -94,8 +86,8 @@ const createCardAfterVerify = async (req, res) => {
 
 const getCardByUserId = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1 if not provided
-    const limit = 10; // Number of transactions per page
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const limit = 10;
 
     const count = await Card.countDocuments({
       $and: [{ userId: req.params.userId }, { type: req.params?.type }],
@@ -108,7 +100,8 @@ const getCardByUserId = async (req, res) => {
       .sort({ _id: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("payment");
+      .populate("address")
+      .populate("productId", "title images");
 
     res.status(201).json({
       status: "success",
@@ -141,11 +134,46 @@ const getCardById = async (req, res) => {
 // get all orders by store id
 const getOrderCardsByStoreId = async (req, res) => {
   try {
-    const cards = await Card.find({ storeId: req.params.storeId });
-    res.status(201).send(cards);
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const limit = 10;
+
+    const count = await Card.countDocuments({ storeId: req.params.storeId });
+    const totalPages = Math.ceil(count / limit);
+
+    const result = await Card.find({ storeId: req.params.storeId })
+      .sort({ _id: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("address")
+      .populate("productId", "title images");
+
+    res.status(201).json({
+      status: "success",
+      data: result,
+      page,
+      totalPages,
+    });
   } catch (error) {
     res.status(500).json({
       status: "error",
+      message: error.message,
+    });
+  }
+};
+
+const updateCardInfoById = async (req, res) => {
+  try {
+    const result = await Card.updateOne({ _id: req.params.id }, req.body, {
+      new: true,
+    });
+    res.status(200).json({
+      success: true,
+      message: `Card Update Successful`,
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
       message: error.message,
     });
   }
@@ -157,4 +185,5 @@ module.exports = {
   getCardByUserId,
   getOrderCardsByStoreId,
   getCardById,
+  updateCardInfoById,
 };
