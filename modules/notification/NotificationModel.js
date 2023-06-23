@@ -2,10 +2,10 @@ const { mongoose, Types } = require("mongoose");
 
 const notificationSchema = new mongoose.Schema(
   {
-    activityId: {
-      type: String,
-      required: true,
-    },
+    // activityId: {
+    //   type: String,
+    //   required: true,
+    // },
     title: {
       type: String,
       required: true,

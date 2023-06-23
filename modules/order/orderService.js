@@ -9,10 +9,14 @@ const newOrder = async (data, address, totalAmount, user, session) => {
       cards: cards,
       totalAmount: totalAmount,
       user: user,
-      address: address,
-      payType: "Online",
       orderNo: orderNo,
     };
+    if (address) {
+      newOrderData["address"] = address;
+      newOrderData["payType"] = "Online";
+    } else {
+      newOrderData["payType"] = "Offline";
+    }
     const result = await Order.create([newOrderData], { session });
     return result;
   } catch (error) {

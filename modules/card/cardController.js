@@ -5,29 +5,18 @@ const { createNewCardForOrder } = require("./cardService");
 
 const createCard = async (req, res) => {
   try {
-    await createNewCardForOrder(req.body)
+    const result = await createNewCardForOrder(req.body)
       .then(async (savedCard) => {
-        const title = `New Card Order - Order No: ${savedCard.orderNo}`;
+        const title = `New Card Orders`;
         const message =
           "Congratulations! You have successfully placed a new order. We will process your order and provide updates soon.";
-        await saveHistory(
-          savedCard._id,
-          title,
-          message,
-          "order",
-          savedCard?.user
-        );
+        await saveHistory(title, message, "order", req.body[0]?.user);
         const newNotification = new Notification({
-          activityId: savedCard._id,
           title: "New Order Received: Order",
           type: "new_order",
-          user: savedCard?.user,
+          user: req.body[0]?.user,
         });
         await newNotification.save();
-        res.status(200).json({
-          status: "success",
-          message: "New Card Add Success",
-        });
       })
       .catch((err) => {
         res.status(500).json({
@@ -35,6 +24,20 @@ const createCard = async (req, res) => {
           message: err.message,
         });
       });
+    console.log(result);
+    if (result) {
+      res.status(200).json({
+        success: true,
+        message: "New Card Add Success",
+        data: result,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "New Card Add unSuccessful",
+        data: result,
+      });
+    }
   } catch (error) {
     res.status(500).json({
       status: "error",
@@ -48,22 +51,14 @@ const createCardAfterVerify = async (req, res) => {
   try {
     await createNewCardForOrder(req.body)
       .then(async (savedCard) => {
-        const title = `New Card Order - Product id: ${req.body.title}`;
+        const title = `New Card Order`;
         const message =
           "Congratulations! You have successfully placed a new order. We will process your order and provide updates soon.";
-        await saveHistory(
-          savedCard._id,
-          title,
-          message,
-          "order",
-          savedCard?.userId
-        );
+        await saveHistory(title, message, "order", req.body[0]?.user);
         const newNotification = new Notification({
-          activityId: savedCard._id,
-          title: "New Card Redeem: Order",
+          title: "New Order Received: Order",
           type: "new_order",
-          from: req.body.userId,
-          to: req.body.storeId,
+          user: req.body[0]?.user,
         });
         await newNotification.save();
         res.status(200).json({ success: true });
@@ -90,18 +85,18 @@ const getCardByUserId = async (req, res) => {
     const limit = 10;
 
     const count = await Card.countDocuments({
-      $and: [{ userId: req.params.userId }, { type: req.params?.type }],
+      $and: [{ user: req.params.userId }, { type: req.params?.type }],
     });
     const totalPages = Math.ceil(count / limit);
 
     const result = await Card.find({
-      $and: [{ userId: req.params.userId }, { type: req.params?.type }],
+      $and: [{ user: req.params.userId }, { type: req.params?.type }],
     })
       .sort({ _id: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .populate("address")
-      .populate("productId", "title images");
+      .populate("product", "title images");
 
     res.status(201).json({
       status: "success",
@@ -137,15 +132,15 @@ const getOrderCardsByStoreId = async (req, res) => {
     const page = req.query.page ? parseInt(req.query.page) : 1;
     const limit = 10;
 
-    const count = await Card.countDocuments({ storeId: req.params.storeId });
+    const count = await Card.countDocuments({ store: req.params.storeId });
     const totalPages = Math.ceil(count / limit);
 
-    const result = await Card.find({ storeId: req.params.storeId })
+    const result = await Card.find({ store: req.params.storeId })
       .sort({ _id: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .populate("address")
-      .populate("productId", "title images");
+      .populate("product", "title images");
 
     res.status(201).json({
       status: "success",

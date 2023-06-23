@@ -24,7 +24,7 @@ const orderSchema = new Schema(
     address: {
       type: Types.ObjectId,
       ref: "Address",
-      required: true,
+      required: false,
     },
     payType: {
       type: String,

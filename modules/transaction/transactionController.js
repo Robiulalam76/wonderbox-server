@@ -1,3 +1,4 @@
+const User = require("../user/UserModel");
 const Transaction = require("./transactionModel");
 
 const createTransaction = async (req, res) => {
@@ -124,16 +125,40 @@ const getDepositByUserId = async (req, res) => {
 
 const updateInfoById = async (req, res) => {
   try {
-    const result = await Transaction.updateOne(
-      { _id: req.params.id },
-      req.body,
-      { new: true }
-    );
-    res.status(200).json({
-      success: true,
-      message: `Transaction Update Successful`,
-      data: result,
-    });
+    const transaction = await Transaction.findById({ _id: req.params.id });
+    const user = await User.findById({ _id: transaction.user });
+    if (transaction.approved === false) {
+      const result = await Transaction.updateOne(
+        { _id: transaction._id },
+        req.body,
+        { new: true }
+      );
+    }
+    if (
+      (transaction &&
+        transaction.approved === false &&
+        transaction?.type === "Deposit") ||
+      transaction?.type === "Withdraw"
+    ) {
+      let total = 0;
+      if (transaction.type === "Deposit") {
+        total = user.wallet + transaction.amount;
+      } else if (transaction.type === "Withdraw") {
+        total = user.wallet - transaction.amount;
+      }
+      if (total) {
+        const result = await User.updateOne(
+          { _id: user._id },
+          { wallet: total },
+          { new: true }
+        );
+        res.status(200).json({
+          success: true,
+          message: `Transaction Update Successful`,
+          data: result,
+        });
+      }
+    }
   } catch (error) {
     res.status(500).json({
       success: false,

@@ -7,9 +7,18 @@ const cardSchema = new mongoose.Schema(
       ref: "Product",
       required: true,
     },
+    title: {
+      type: String,
+      required: true,
+    },
     store: {
       type: Types.ObjectId,
       ref: "Store",
+      required: true,
+    },
+    user: {
+      type: Types.ObjectId,
+      ref: "User",
       required: true,
     },
     features: {
@@ -24,6 +33,16 @@ const cardSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    address: {
+      type: Types.ObjectId,
+      ref: "Address",
+      required: false,
+    },
+    payType: {
+      type: String,
+      enum: ["Online", "Offline"],
+      required: true,
+    },
     type: {
       type: String,
       enum: ["Wallet", "Package"],
@@ -33,6 +52,10 @@ const cardSchema = new mongoose.Schema(
       type: String,
       enum: ["Enable", "Used", "Expired"],
       default: "Enable",
+    },
+    serialNumber: {
+      type: String,
+      required: true,
     },
     checkNumber: {
       type: String,

@@ -4,7 +4,7 @@ const historySchema = new mongoose.Schema(
   {
     activityId: {
       type: String,
-      required: true,
+      required: false,
     },
     title: {
       type: String,
@@ -30,10 +30,6 @@ const historySchema = new mongoose.Schema(
     roleId: {
       type: String,
       required: true,
-    },
-    createAt: {
-      type: Date,
-      default: Date.now,
     },
   },
   {
