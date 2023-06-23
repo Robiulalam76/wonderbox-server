@@ -121,13 +121,13 @@ const getTransactionById = async (req, res) => {
   }
 };
 
-const getDepositByUserId = async (req, res) => {
+const getTransactionByUserId = async (req, res) => {
   const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1 if not provided
   const limit = 10; // Number of transactions per page
   const approvedFilter = req.query.approved; // Approved filter value (true, false, or undefined)
 
   try {
-    let conditions = [{ user: req.params.userId }, { type: "Deposit" }];
+    let conditions = [{ user: req.params.userId }, { type: req.params.type }];
 
     if (approvedFilter !== undefined) {
       conditions.push({ approved: approvedFilter });
@@ -205,6 +205,6 @@ module.exports = {
   createWithdraw,
   getAllTransactions,
   getTransactionById,
-  getDepositByUserId,
+  getTransactionByUserId,
   updateInfoById,
 };
