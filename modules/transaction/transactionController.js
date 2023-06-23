@@ -28,6 +28,39 @@ const createTransaction = async (req, res) => {
   }
 };
 
+/// create new withdraw
+const createWithdraw = async (req, res) => {
+  try {
+    const user = await User.findById({ _id: req.body.user });
+    if (user && req.body.amount <= user?.wallet) {
+      const newWithdraw = new Transaction({
+        bank: req.body.bank,
+        accountNo: req.body.accountNo,
+        amount: req.body.amount,
+        user: req.body.user,
+        type: "Withdraw",
+        description: req.body.description,
+      });
+      const result = await newWithdraw.save();
+      res.status(200).json({
+        success: true,
+        message: `Withdraw Request Send Successful`,
+        data: result,
+      });
+    } else {
+      res.status(500).send({
+        success: false,
+        message: `You cannot withdraw more than your ${user?.wallet} wallet balance!`,
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 const getAllTransactions = async (req, res) => {
   const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1 if not provided
   const limit = 10; // Number of transactions per page
@@ -169,6 +202,7 @@ const updateInfoById = async (req, res) => {
 
 module.exports = {
   createTransaction,
+  createWithdraw,
   getAllTransactions,
   getTransactionById,
   getDepositByUserId,

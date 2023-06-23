@@ -8,7 +8,7 @@ const transactionSchema = new mongoose.Schema(
     },
     branch: {
       type: String,
-      required: true,
+      required: false,
     },
     accountNo: {
       type: Number,
@@ -20,11 +20,11 @@ const transactionSchema = new mongoose.Schema(
     },
     txnId: {
       type: String,
-      required: true,
+      required: false,
     },
     images: {
       type: [String],
-      required: true,
+      required: false,
     },
     user: {
       type: String,

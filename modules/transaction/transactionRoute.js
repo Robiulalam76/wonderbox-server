@@ -5,11 +5,13 @@ const {
   getDepositByUserId,
   updateInfoById,
   getTransactionById,
+  createWithdraw,
 } = require("./transactionController");
 const router = express.Router();
 
 // create new transaction
-router.post("/", createTransaction);
+router.post("/deposit", createTransaction);
+router.post("/withdraw", createWithdraw);
 
 // get all transactions
 router.get("/", getAllTransactions);
