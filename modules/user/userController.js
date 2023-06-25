@@ -1,8 +1,13 @@
 const User = require("./UserModel");
 const bcrypt = require("bcryptjs");
-const { signInToken } = require("../../config/auth");
+const {
+  signInToken,
+  generateEmailVerifyToken,
+  getUserInfoByToken,
+} = require("../../config/auth");
 const Notification = require("../notification/NotificationModel");
 const { saveHistory } = require("../../commons/services/saveHistory");
+const { sendEmailVerifyMail } = require("./userUtils");
 
 const registerUser = async (req, res) => {
   const { name, email, password, country, phone, role } = req.body;
@@ -11,63 +16,71 @@ const registerUser = async (req, res) => {
     const isAdded = await User.findOne({ email: email });
     if (isAdded) {
       return res.status(200).json({
-        status: "error",
+        success: false,
         message: { emailMessage: "Email Already in Use" },
         data: req.body.email,
       });
     } else {
-      const newUser = new User({
+      const newUser = {
         name,
         email,
         country,
         phone,
         role,
         password: bcrypt.hashSync(password),
-      });
-      newUser
-        .save()
-        .then(async (savedUser) => {
-          const title = `New User Create - User name: ${name}`;
-          const message =
-            "Congratulations! You have successfully created a new Account.";
-          await saveHistory(
-            savedUser._id,
-            title,
-            message,
-            "user",
-            savedUser?._id
-          );
-          const newNotification = new Notification({
-            activityId: savedUser._id,
-            title: "New Account Create Successfull!",
-            type: "new_user",
-            to: savedUser?._id,
-          });
-          await newNotification.save();
-          const token = signInToken({
-            name,
-            email,
-            password: bcrypt.hashSync(password),
-          });
-          res.send({
-            success: true,
-            token: token,
-            _id: newUser._id,
-            name: newUser.name,
-            email: newUser.email,
-            message: "Please Login Now!",
-          });
-        })
-        .catch((err) => {
-          res.status(500).json({
-            status: "error",
-            message: err.message,
-          });
+      };
+      const token = await generateEmailVerifyToken(newUser);
+      if (token) {
+        await sendEmailVerifyMail(email, token);
+        res.status(200).json({
+          success: true,
+          message: "Please Check Your Email and verify Email",
         });
+      }
     }
   } catch (error) {
     res.status(400).json({
-      status: "error",
+      success: false,
+      message: "Data couldn't insert z",
+      error: error.message,
+    });
+  }
+};
+
+const verifyAndRegister = async (req, res) => {
+  try {
+    const { authorization } = req.headers;
+    const token = authorization.split(" ")[1];
+    const info = await getUserInfoByToken(token);
+    if (info) {
+      const isExist = await User.findOne({ email: info?.email });
+      if (!isExist) {
+        const newUser = new User({
+          name: info?.name,
+          email: info?.email,
+          country: info?.country,
+          phone: info?.phone,
+          role: info?.role,
+          verified: "true",
+          password: info?.password,
+        });
+        const result = await newUser.save();
+        if (result) {
+          res.status(200).json({
+            success: true,
+            message: "You Have Successfully Verified Account",
+          });
+        }
+      } else {
+        res.status(400).json({
+          success: true,
+          message: "Already Email Verified !",
+        });
+      }
+    }
+  } catch (error) {
+    res.status(400).json({
+      success: false,
       message: "Data couldn't insert z",
       error: error.message,
     });
@@ -322,6 +335,7 @@ const deleteUser = async (req, res) => {
 
 module.exports = {
   registerUser,
+  verifyAndRegister,
   loginUser,
   getAllUsers,
   getUserById,

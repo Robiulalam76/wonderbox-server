@@ -3,10 +3,14 @@ const Card = require("./CardModel");
 const { generateCards } = require("./cardUtils");
 const StoreCard = require("../storeCard/StoreCardModel");
 const { addSellerWallet, decreaseBuyerWallet } = require("../user/userService");
+const { sendOrderMail } = require("../../commons/sendOrderMail");
+const User = require("../user/UserModel");
+const Store = require("../store/storeModel");
 
 // create new cards
-const createNewCardForOrder = async (data) => {
+const createNewCardForOrder = async (option, data) => {
   let newOrderData = null;
+  const user = await User.findById({ _id: data[0]?.user });
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -25,6 +29,13 @@ const createNewCardForOrder = async (data) => {
           { new: true }
         );
         if (updateCard) {
+          const store = await Store.findById({ _id: data[0]?.store });
+          const seller = await Store.findById({ _id: store?.seller });
+          await sendOrderMail(
+            [user?.email, seller?.email],
+            user?.name,
+            store?.name
+          );
           newOrderData = createdCard[0];
         } else {
           await session.commitTransaction();
@@ -32,14 +43,18 @@ const createNewCardForOrder = async (data) => {
         }
       }
     } else {
-      const decreaseBuyer = await decreaseBuyerWallet(data[0].user, data);
-      if (decreaseBuyer) {
-        const addWallet = await addSellerWallet(data);
-        if (addWallet) {
-          newOrderData = createdCard[0];
+      const addWallet = await addSellerWallet(data, user);
+      if (addWallet) {
+        if (option === "wallet") {
+          const decreaseBuyer = await decreaseBuyerWallet(data[0].user, data);
+          if (decreaseBuyer) {
+            newOrderData = createdCard[0];
+          } else {
+            await session.commitTransaction();
+            await session.endSession();
+          }
         } else {
-          await session.commitTransaction();
-          await session.endSession();
+          newOrderData = createdCard[0];
         }
       } else {
         await session.commitTransaction();

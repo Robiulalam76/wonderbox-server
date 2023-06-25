@@ -5,18 +5,23 @@ const { createNewCardForOrder } = require("./cardService");
 
 const createCard = async (req, res) => {
   try {
-    const result = await createNewCardForOrder(req.body)
+    await createNewCardForOrder(req.body?.option, req.body?.cards)
       .then(async (savedCard) => {
         const title = `New Card Orders`;
         const message =
           "Congratulations! You have successfully placed a new order. We will process your order and provide updates soon.";
-        await saveHistory(title, message, "order", req.body[0]?.user);
+        await saveHistory(title, message, "order", req.body?.cards[0]?.user);
         const newNotification = new Notification({
           title: "New Order Received: Order",
           type: "new_order",
           user: req.body[0]?.user,
         });
         await newNotification.save();
+
+        res.status(200).json({
+          success: true,
+          message: "New Order Successful",
+        });
       })
       .catch((err) => {
         res.status(500).json({
@@ -24,20 +29,7 @@ const createCard = async (req, res) => {
           message: err.message,
         });
       });
-    console.log(result);
-    if (result) {
-      res.status(200).json({
-        success: true,
-        message: "New Card Add Success",
-        data: result,
-      });
-    } else {
-      return res.status(200).json({
-        success: false,
-        message: "New Card Add unSuccessful",
-        data: result,
-      });
-    }
+    // console.log(result);
   } catch (error) {
     res.status(500).json({
       status: "error",
@@ -49,7 +41,7 @@ const createCard = async (req, res) => {
 // create card after verify
 const createCardAfterVerify = async (req, res) => {
   try {
-    await createNewCardForOrder(req.body)
+    await createNewCardForOrder("wallet", req.body)
       .then(async (savedCard) => {
         const title = `New Card Order`;
         const message =
@@ -116,7 +108,9 @@ const getCardByUserId = async (req, res) => {
 
 const getCardById = async (req, res) => {
   try {
-    const result = await Card.findOne({ _id: req.params.id });
+    const result = await Card.findOne({ _id: req.params.id })
+      .populate("address")
+      .populate("store", "name logo");
     res.status(201).send(result);
   } catch (error) {
     res.status(500).json({

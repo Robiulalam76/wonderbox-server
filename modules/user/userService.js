@@ -2,6 +2,7 @@ const { Error } = require("mongoose");
 const User = require("./UserModel");
 const Store = require("../store/storeModel");
 const { calculateEarn } = require("./userUtils");
+const { sendOrderMail } = require("../../commons/sendOrderMail");
 
 // const addSellerWallet = async (id, newWallet) => {
 //   try {
@@ -24,7 +25,7 @@ const { calculateEarn } = require("./userUtils");
 //   }
 // };
 
-const addSellerWallet = async (cards) => {
+const addSellerWallet = async (cards, user) => {
   try {
     let adminWallet = 0;
     for (let i = 0; i < cards.length; i++) {
@@ -43,6 +44,11 @@ const addSellerWallet = async (cards) => {
           { new: true }
         );
       }
+      await sendOrderMail(
+        [user?.email, store?.seller?.email],
+        user?.name,
+        store?.name
+      );
     }
     const admin = await User.findOne({ email: "admin@gmail.com" });
     const newWallet = admin.wallet + parseInt(adminWallet);
@@ -51,7 +57,6 @@ const addSellerWallet = async (cards) => {
       { wallet: newWallet },
       { new: true }
     );
-    console.log(adminUpdate);
     if (adminUpdate) {
       return adminUpdate;
     }

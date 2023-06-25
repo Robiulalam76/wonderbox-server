@@ -11,13 +11,7 @@ const createAddCart = async (req, res) => {
       const title = `New Product Add Cart - `;
       const message =
         "Congratulations! You have successfully created a new product Add Cart.";
-      await saveHistory(
-        savedAddCart._id,
-        title,
-        message,
-        "add_cart",
-        req.body.userId
-      );
+      await saveHistory(title, message, "add_cart", req.body.userId);
       res.status(200).json({
         status: "success",
         message: "new add Cart added successfull",
@@ -36,7 +30,10 @@ const createAddCart = async (req, res) => {
 const getAddCartProducts = async (req, res) => {
   try {
     const products = await AddCart.find({ userId: req.params.userId })
-      .populate("product")
+      .populate({
+        path: "product",
+        populate: [{ path: "storeId", select: "name" }],
+      })
       .sort({ timestamps: -1 });
     res.status(200).send(products);
   } catch (error) {
@@ -55,13 +52,7 @@ const removeAddCartById = async (req, res) => {
       async (removedAddCart) => {
         const title = `AddCart Product Removed`;
         const message = "You have successfully Deleted a Cart product.";
-        await saveHistory(
-          req.params.addCartId,
-          title,
-          message,
-          "add_cart",
-          req.params.userId
-        );
+        await saveHistory(title, message, "add_cart", req.params.userId);
         res.status(200).json({
           status: "success",
           message: "Cart product deleted",
