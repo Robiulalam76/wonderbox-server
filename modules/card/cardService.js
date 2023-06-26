@@ -6,6 +6,8 @@ const { addSellerWallet, decreaseBuyerWallet } = require("../user/userService");
 const { sendOrderMail } = require("../../commons/sendOrderMail");
 const User = require("../user/UserModel");
 const Store = require("../store/storeModel");
+const { saveHistory } = require("../../commons/services/saveHistory");
+const saveNotification = require("../../commons/SaveNotification");
 
 // create new cards
 const createNewCardForOrder = async (option, data) => {
@@ -21,7 +23,7 @@ const createNewCardForOrder = async (option, data) => {
       throw new Error("Failed to create order");
     }
     if (data[0].payType === "Offline") {
-      const addWallet = await addSellerWallet(data);
+      const addWallet = await addSellerWallet(data, user, createdCard);
       if (addWallet) {
         const updateCard = await StoreCard.findByIdAndUpdate(
           { _id: data[0].card },
@@ -36,6 +38,18 @@ const createNewCardForOrder = async (option, data) => {
             user?.name,
             store?.name
           );
+          await saveHistory(
+            `New Card Orders`,
+            "Congratulations! You have successfully placed a new order. We will process your order and provide updates soon.",
+            "order",
+            data[0]?.user
+          );
+          await saveNotification(
+            createdCard[0]?._id,
+            "New Order Successfully!",
+            "new_order",
+            data[0].user
+          );
           newOrderData = createdCard[0];
         } else {
           await session.commitTransaction();
@@ -43,7 +57,7 @@ const createNewCardForOrder = async (option, data) => {
         }
       }
     } else {
-      const addWallet = await addSellerWallet(data, user);
+      const addWallet = await addSellerWallet(data, user, createdCard);
       if (addWallet) {
         if (option === "wallet") {
           const decreaseBuyer = await decreaseBuyerWallet(data[0].user, data);

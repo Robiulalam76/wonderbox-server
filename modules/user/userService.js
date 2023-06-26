@@ -3,29 +3,10 @@ const User = require("./UserModel");
 const Store = require("../store/storeModel");
 const { calculateEarn } = require("./userUtils");
 const { sendOrderMail } = require("../../commons/sendOrderMail");
+const { saveHistory } = require("../../commons/services/saveHistory");
+const saveNotification = require("../../commons/SaveNotification");
 
-// const addSellerWallet = async (id, newWallet) => {
-//   try {
-//     const store = await Store.findById({ _id: id }).populate("seller");
-//     const { discount, remainingPrice } = await calculateEarn(
-//       parseInt(newWallet)
-//     );
-//     console.log(store, discount, remainingPrice);
-//     if (store && store?.seller?.role === "seller") {
-//       const total = store.seller?.wallet + remainingPrice;
-//       const result = await User.updateOne(
-//         { _id: store?.seller?._id },
-//         { wallet: total },
-//         { new: true }
-//       );
-//       return result;
-//     }
-//   } catch (error) {
-//     throw new Error();
-//   }
-// };
-
-const addSellerWallet = async (cards, user) => {
+const addSellerWallet = async (cards, user, createdCard) => {
   try {
     let adminWallet = 0;
     for (let i = 0; i < cards.length; i++) {
@@ -48,6 +29,18 @@ const addSellerWallet = async (cards, user) => {
         [user?.email, store?.seller?.email],
         user?.name,
         store?.name
+      );
+      await saveHistory(
+        `New Card Orders: ${cards[i]?.title}`,
+        "Congratulations! You have successfully placed a new order. We will process your order and provide updates soon.",
+        "order",
+        user?._id
+      );
+      await saveNotification(
+        createdCard[i]?._id,
+        `New Order Successfully! : ${cards[i]?.title}`,
+        "new_order",
+        user?._id
       );
     }
     const admin = await User.findOne({ email: "admin@gmail.com" });

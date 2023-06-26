@@ -5,31 +5,15 @@ const { createNewCardForOrder } = require("./cardService");
 
 const createCard = async (req, res) => {
   try {
-    await createNewCardForOrder(req.body?.option, req.body?.cards)
-      .then(async (savedCard) => {
-        const title = `New Card Orders`;
-        const message =
-          "Congratulations! You have successfully placed a new order. We will process your order and provide updates soon.";
-        await saveHistory(title, message, "order", req.body?.cards[0]?.user);
-        const newNotification = new Notification({
-          title: "New Order Received: Order",
-          type: "new_order",
-          user: req.body[0]?.user,
-        });
-        await newNotification.save();
-
-        res.status(200).json({
-          success: true,
-          message: "New Order Successful",
-        });
-      })
-      .catch((err) => {
-        res.status(500).json({
-          status: "error",
-          message: err.message,
-        });
-      });
-    // console.log(result);
+    const result = await createNewCardForOrder(
+      req.body?.option,
+      req.body?.cards
+    );
+    res.status(200).json({
+      success: true,
+      message: "New Order Successful!",
+      data: result,
+    });
   } catch (error) {
     res.status(500).json({
       status: "error",
