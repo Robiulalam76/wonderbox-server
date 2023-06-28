@@ -31,6 +31,7 @@ const addSellerWallet = async (cards, user, createdCard) => {
         store?.name
       );
       await saveHistory(
+        createdCard[i]?._id,
         `New Card Orders: ${cards[i]?.title}`,
         "Congratulations! You have successfully placed a new order. We will process your order and provide updates soon.",
         "order",

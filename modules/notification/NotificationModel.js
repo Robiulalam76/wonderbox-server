@@ -12,7 +12,14 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["new_user", "new_order", "order_status", "review"],
+      enum: [
+        "new_user",
+        "new_order",
+        "order_status",
+        "review",
+        "add_cart",
+        "address",
+      ],
       required: true,
     },
     user: {
@@ -22,7 +29,7 @@ const notificationSchema = new mongoose.Schema(
     },
   },
   {
-    timestamp: true,
+    timestamps: true,
   }
 );
 

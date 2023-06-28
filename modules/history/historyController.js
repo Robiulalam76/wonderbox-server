@@ -40,7 +40,7 @@ const getHistoryByRoleId = async (req, res) => {
     const totalPages = Math.ceil(count / limit);
 
     const histories = await History.find({ roleId })
-      .sort({ createAt: -1 })
+      .sort({ _id: -1 })
       .skip(skip)
       .limit(limit);
 

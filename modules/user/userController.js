@@ -98,7 +98,6 @@ const loginUser = async (req, res) => {
       });
     } else {
       const findUser = await User.findOne({ email: email });
-      console.log(findUser);
       if (!findUser) {
         return res.send({
           status: "error",
@@ -175,9 +174,9 @@ const signupWithSocial = async (req, res) => {
           );
           const newNotify = new Notification({
             activityId: savedUser._id,
-            title: "New Account Create Successfull!",
+            title: "New Account Create Successful!",
             type: "new_user",
-            to: savedUser?._id,
+            user: savedUser?._id,
           });
           await newNotify.save();
           const token = signInToken(savedUser);

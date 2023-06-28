@@ -1,4 +1,3 @@
-const Store = require("../store/storeModel");
 const User = require("../user/UserModel");
 const Notification = require("./NotificationModel");
 
@@ -30,7 +29,9 @@ const getNotificationByUserId = async (req, res) => {
     const { userId } = req.params;
     const notifications = await Notification.find({
       $or: [{ user: userId }],
-    }).sort({ _id: -1 });
+    })
+      .sort({ _id: -1 })
+      .limit(20);
     res.status(200).send(notifications);
   } catch (error) {
     res.status(500).json({
@@ -47,14 +48,14 @@ const getNotificationByStoreId = async (req, res) => {
 
     if (findUser?.role === "admin") {
       const notifications = await Notification.find({})
-        .sort({ timestamp: -1 }) // Sort by the 'timestamp' field in descending order
+        .sort({ _id: -1 }) // Sort by the 'timestamp' field in descending order
         .exec();
       res.status(200).send(notifications);
     } else if (findUser?.role === "seller") {
       const notifications = await Notification.find({
         $or: [{ user: req.params.roleId }],
       })
-        .sort({ timestamp: -1 })
+        .sort({ _id: -1 })
         .exec();
 
       res.status(200).send(notifications);

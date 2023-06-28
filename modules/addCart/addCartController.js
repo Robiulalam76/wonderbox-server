@@ -7,15 +7,11 @@ const createAddCart = async (req, res) => {
       userId: req.body.userId,
       product: req.body.product,
     });
-    await newWishlist.save().then(async (savedAddCart) => {
-      const title = `New Product Add Cart - `;
-      const message =
-        "Congratulations! You have successfully created a new product Add Cart.";
-      await saveHistory(title, message, "add_cart", req.body.userId);
-      res.status(200).json({
-        status: "success",
-        message: "new add Cart added successfull",
-      });
+    const result = await newWishlist.save();
+    res.status(200).json({
+      status: "success",
+      message: "new add Cart added successful",
+      data: result,
     });
   } catch (error) {
     res.status(500).json({
@@ -48,17 +44,12 @@ const getAddCartProducts = async (req, res) => {
 // get all AddCart products by userid
 const removeAddCartById = async (req, res) => {
   try {
-    await AddCart.deleteOne({ _id: req.params.addCartId }).then(
-      async (removedAddCart) => {
-        const title = `AddCart Product Removed`;
-        const message = "You have successfully Deleted a Cart product.";
-        await saveHistory(title, message, "add_cart", req.params.userId);
-        res.status(200).json({
-          status: "success",
-          message: "Cart product deleted",
-        });
-      }
-    );
+    const result = await AddCart.deleteOne({ _id: req.params.addCartId });
+    res.status(200).json({
+      status: "success",
+      message: "Cart product deleted",
+      data: result,
+    });
   } catch (error) {
     res.status(500).json({
       status: "error",

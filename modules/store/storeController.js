@@ -39,6 +39,7 @@ const addStore = async (req, res) => {
 const getStore = async (req, res) => {
   try {
     const store = await Store.find({ status: "Show" }).populate("seller");
+    console.log(store);
     res.send(store);
   } catch (error) {
     res.status(500).json({
@@ -130,7 +131,7 @@ const deleteSingleStore = async (req, res) => {
 
 // get verified stores
 const getVerifiedStores = async (req, res) => {
-  const store = await Store.find({ verified: true }).limit(8);
+  const store = await Store.find({ verified: true, status: "Show" }).limit(8);
   if (!store) {
     res.status(200);
     throw new Error("Order list is empty..");

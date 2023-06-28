@@ -24,6 +24,7 @@ const historySchema = new mongoose.Schema(
         "review",
         "wishlist",
         "add_cart",
+        "address",
       ],
       required: true,
     },

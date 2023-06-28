@@ -25,26 +25,12 @@ const createCard = async (req, res) => {
 // create card after verify
 const createCardAfterVerify = async (req, res) => {
   try {
-    await createNewCardForOrder("wallet", req.body)
-      .then(async (savedCard) => {
-        const title = `New Card Order`;
-        const message =
-          "Congratulations! You have successfully placed a new order. We will process your order and provide updates soon.";
-        await saveHistory(title, message, "order", req.body[0]?.user);
-        const newNotification = new Notification({
-          title: "New Order Received: Order",
-          type: "new_order",
-          user: req.body[0]?.user,
-        });
-        await newNotification.save();
-        res.status(200).json({ success: true });
-      })
-      .catch((err) => {
-        res.status(500).json({
-          status: "error",
-          message: err.message,
-        });
-      });
+    const result = await createNewCardForOrder("wallet", req.body);
+    res.status(200).json({
+      success: true,
+      message: "New Order Successful!",
+      data: result,
+    });
   } catch (error) {
     res.status(500).json({
       status: "error",
